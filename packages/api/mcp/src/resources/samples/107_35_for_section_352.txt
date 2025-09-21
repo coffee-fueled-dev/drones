@@ -1,0 +1,149 @@
+This is a representative sample of an approved waiver
+application for 14 CFR § 107.35
+Small UAS #1 Details
+Make: 123 UAS
+Model: Octocopter
+Small UAS #2 Details
+Make: 123 UAS
+Model: Octocopter
+Small UAS #3 Details
+Make: 123 UAS
+Model: Octocopter
+Small UAS #4 Details
+Make: 123 UAS
+Model: Octocopter
+Waiver Application:
+What regulation(s) do you want waived?
+107.35: Operation of multiple small unmanned aircraft
+Start date: 20XX-11-XX
+End date: 20XX-11-XX
+Waiver safety explanation:
+ABC Drone Services is requesting a waiver to §107.35 in order to operate 4 123 UAS’s
+small unmanned aircraft (sUA) simultaneously for the purpose of monitoring a privately
+owned 40 acre, fenced in Vineyard measuring XXX feet wide and XXXX feet long,
+located approximately 5 miles South East of XXXX. All operations will be conducted in
+Class G airspace, below 400 feet AGL, during daylight hours, and with at least 3 miles
+visibility. A private non-public use airport is the nearest airport located 4 miles west of
+the propose operations area. There are no other airports within 5 miles of the proposed
+operations area. Our operations area consists of flat terrain with no obstructions such as
+trees or structures. Our proposed operation will require 4 123 UAS’s sUA fly
+simultaneously down the length of the vineyard, these sUAs will be lined up side by side
+with 50 feet separation between each sUA. Our remote pilot in command (RPIC) will be
+positioned halfway down the length of the field, with a visual observer (VO) at each end
+of the field. Our RPIC and VOs will be on a 5 foot high platforms which will enable them
+to see over the crops, allowing our RPIC and VOs to maintain visual line of sight with
+each of the sUA. Each small unmanned aircraft utilizes geo fencing to keep the sUA’s
+within the property boundaries of the vineyard, the sUA’s will fly a pre-programed flight
+path down the length of the operational area. At the opposite end of the field the sUA’s
+are programmed to enter a hover until the RPIC takes manual control of each sUA
+individually. The RPIC will land each sUA in a pre-designated location. We have
+included an operations manual with our application.
+Specific Operation Details:
+1. Where do you plan to operate? XXXXX, XXXXXX at Latitude XX.003572
+Longitude -XXX.275184 - See Section 1.5.3
+2. How high will you fly your aircraft? 400 feet Above Ground Level (AGL) – See
+Section 1.4.4
+3. Do you want to fly in controlled airspace (Class B, C, D, surface E)? No – all
+flights will be in Class G airspace. – See Section 1.4.8
+4. Are there any other kinds of airspace within 5 miles of any planned flight area?
+No – all airspace within 5 miles is Class G airspace. – See Section 1.4.8
+5. What kind of area(s) will you fly over? Unpopulated privately owned, fenced
+agricultural land – See Section 1.5.3
+Small UAS Details:
+1. What kind of UAS will you use to fly the operations requested in this application?
+123 UAS Octocopter – See Section 1.4.9
+2. What is your UAS’s power or energy source in flight? lithium polymer battery –
+See Section 1.4.9
+3. What is your UAS’s maximum flight time (in minutes), range (in feet), and speed
+(in miles per hour)? Flight time with payload – 35 minutes, Range – 10032 feet,
+Maximum Speed – 32 mph – See Section 1.4.9
+4. How big is the aircraft? a. Length – 48” b. Width – 48” c. Height – 18” – See
+Section 1.4.9
+5. How do you ensure the aircraft only flies where it is directed (i.e. ensure
+containment)? “Geo Fencing” – See Section 1.4.4
+6. What kind of termination system, if any, does the UAS have? Each sUA is
+equipped with an immediate flight termination switch – See Section 1.4.4
+7. How much will the aircraft and its payload weigh when flying? 6.3lbs (aircraft) +
+1.lbs (payload) = 7.4lbs (total weight) – See Section 1.4.4
+8. If the aircraft carries any external or internal load (or object), how is the load
+secured? The payload has 2 pegs that fit into slots in the payload bay under the
+aircraft, and a latch that secures the payload. The only payloads that will be used
+are designed/manufactured by 123 UAS and are standard to the 123 UAS
+Octocopter system. – See Section 1.4.4
+9. What, if any, external or internal load (or object) could be dropped from the
+aircraft when flying, and how will you assure the safety of people, or other
+people’s property, if it is dropped or detached when flying? a. The Sensor payload
+could theoretically fall off the aircraft in the event the securing latch fails.
+However, all tests are flown over privately owned, unpopulated, agricultural land
+so there is no danger of injuring a person or other people’s property.
+Pilot/Personnel Details:
+1. What minimum level of experience will the Remote Pilot in Command (RPIC)
+have to fly under this waiver?
+RPIC will hold a Part 107 Remote Pilot certificated and have a minimum of 10
+hours of flight time on the 123 UAS Octocopter system. RPIC will log 5 hours of
+operating multi-sUAs flight simulation time on the 123 UAS Mission Control
+Station (MCS) Simulator prior to actual multi- sUA operations
+2. How many personnel (including the Remote PIC) will you use for operations
+under this waiver (minimum needed)? 3 – A minimum of 1 RPIC and 2 VOs will
+be used for all operations. – See Section 1.5.1
+3. What kind of training, if any, will personnel (e.g. visual observer(s)) have prior to
+flying under this waiver and how will personnel be trained?
+Prior to commencement of operations, each RPIC and VO will receive training on
+the regulation contained in Part 107, the limitations of this waiver and proper
+scanning techniques as described on page 17-23 of the Pilots Handbook of
+Aeronautical Knowledge (FAA-H-8083-25B). Each RPIC and VO must
+complete a 20 question test on the above subject matter. This test will be signed,
+dated and retained on file. Prior to each operation, the RPIC will brief the visual
+observers on the, location, airspace restrictions, flight plans and discuss each crew
+members responsibilities.
+How will the Responsible Person know the other personnel are competent and
+have operational knowledge to safely fly the UAS under the waiver conditions?
+Each RPIC will hold a Part 107 Remote Pilot certificate and an up-to-date flight
+log. Each RPIC and VO will have taken the test described above, with that test on
+file. If personnel will be tested, what kind of testing will be performed, and how
+will evaluations be conducted and documented? Each RPIC and VO will be
+require to take a 20 question written test, incorrect answers will be reviewed and
+discussed until each test can be corrected to 100%. This test will be signed and
+dated by the student and retained on file.
+How will personnel maintain the knowledge/skill to fly under this waiver? Will
+recurrent training or testing be required? Prior to performing any multi-sUA
+operation the RPIC will have logged a minimum of 30 minutes of single-sUAS
+flight time in the last 60 days and 30 minutes of multi-sUAS simulation time via
+123 UAS MCS Simulation in the last 60 days.
+Guiding Questions
+1. How does the system simultaneously control multiple participating aircraft and
+avoid collisions between those aircraft? 123 UAS Mission Control Station (MCS)
+natively supports One-to-Many control – See Section 1.4.3
+2. How will the system ensure individual participating aircraft remain contained in
+the pre-determined operational area? a. A combination of a pre-programed flight
+path and Geo Fencing will be used – See Section 1.4.4
+3. How will the RPIC see and avoid, or detect and avoid, all other aircraft when
+operation multiple aircraft? Will the proposed operations use a VO(s)? Yes, VOs
+will visually scan the operation area and adjacent airspace for unexpected air and
+ground traffic – See Section 1.5.1
+4. How will the RPIC safely stop/terminate all participating aircraft in the event of a
+hazard? 123 UAS Mission Control Station (MCS) allows the pilot to individually
+select an aircraft and adjust altitude, command an immediate land, or terminate
+flight – See Section 1.4.4
+5. How will the RPIC know when a single aircraft has failed, and how will the RPIC
+respond? How will the RPIC respond to multiple aircraft failing at the same time?
+123 UAS Mission Control Station (MCS) has a combination of safety features to
+reduce the risk of both single-aircraft error situations and multi-aircraft error
+situations. See Section 1.4.3
+6. What additional pre-flight safety procedures would the RPIC undergo to ensure
+safe operation? As described above the RPIC will conduct a preflight safety
+briefing RPIC on the, location, airspace restrictions, flight plans and discuss each
+crew members responsibilities. See Section 1.4.8
+7. How many command and control links and methods are used in the system? Each
+aircraft will have their own base-station for command and control. Do the aircraft
+communicate with each other? If so, what path do the communications follow?
+No, the aircraft do not communicate with each other. How do the system and/or
+individual aircraft respond when communications fail? The default behavior is
+for the aircraft to enter static hover until the C2 link can be reestablished – See
+Section 1.4.4
+8. How will the RPIC maintain a stand-off distance (buffer zone) from non-
+participating people or property a. A combination of geo fencing and operating
+over privately owned property will be used. See Section 1.4.4
+Other Certificates of Waiver or Authorization
+Is there a pending or approved waiver or authorization associated with this proposed
+operation? No

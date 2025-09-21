@@ -1,0 +1,16 @@
+{
+  "name": "@cfd/fact-extractor",
+  "version": "0.1.0-beta.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "all": "bun run src/index.ts"
+  },
+  "devDependencies": {},
+  "peerDependencies": {},
+  "dependencies": {
+    "openai": "^5.22.0",
+    "queue": "^7.0.0",
+    "zod": "^3.25.0"
+  }
+}

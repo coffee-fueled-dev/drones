@@ -1,0 +1,386 @@
+1
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+Part 107 Waiver Safety Explanation Guidelines
+and Guiding Questions
+Table of Contents
+§ 107.25 Operation from a Moving Vehicle or Aircraft ................................................................................ 2
+§ 107.29 Operation at Night ......................................................................................................................... 3
+§ 107.31 Visual Line of Sight Aircraft Operation ........................................................................................... 4
+§ 107.33 Visual Observer .............................................................................................................................. 7
+§ 107.35 Operation of Multiple Small Unmanned Aircraft (sUA) ................................................................. 8
+§ 107.37 Operation Near Aircraft; Right-of-Way Rules ................................................................................ 9
+§ 107.39 Operation over Human Beings..................................................................................................... 10
+§ 107.51(a) Operating Limitations for Small Unmanned Aircraft: Groundspeed ....................................... 11
+§ 107.51(b) Operating Limitations for Small Unmanned Aircraft: Altitude ................................................ 12
+§ 107.51(c) Operating Limitations for Small Unmanned Aircraft: Minimum Flight Visibility ..................... 13
+§ 107.51(d) Operating Limitations for Small Unmanned Aircraft: Cloud Clearance .................................. 14
+§ 107.145 Operation over Moving Vehicles ............................................................................................... 15
+2
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.25 Operation from a Moving Vehicle or Aircraft
+1. Describe how you will ensure the dynamic (i.e., ever-changing) area of operation is
+evaluated for potential hazards and risks to non-participating persons and property.
+Include a description of how you will mitigate those risks so the hazards are
+controlled or eliminated.
+a. How will you identify potential hazards to other aircraft, people, and
+property before flying and during flight?
+b. From what kind of vehicle will the Remote Pilot in Command (RPIC) be
+operating the small unmanned aircraft system (sUAS)?
+c. Where will the RPIC and Visual Observer(s) (VO), if used, be in the vehicle or
+along the route?
+2. Describe how the RPIC and VO will be able to maintain visual line of sight (VLOS)
+with the small unmanned aircraft (sUA) from the moving vehicle.
+a. How will the RPIC be able to see the sUA when both are moving?
+b. How will a VO who meets the requirements of § 107.33, be used for operations
+conducted under this waiver?
+c. What will the VO's responsibilities and/or duties be during flight?
+d. What will the RPIC or VO(s) do if they lose VLOS with the sUA?
+3. Describe how all persons involved in the operation will stay free of distractions that
+may prevent them from fulfilling their duties.
+a. How will the RPIC and VO(s) communicate during flight?
+b. How will the RPIC and VO(s) remain free from distractions during flight?
+4. What are the procedures the RPIC will follow during a loss of data link with the sUA?
+How do these procedures account for the dynamic movement and positioning of the
+RPIC and ground control station?
+a. What will the RPIC do if he/she loses the command and control link with the sUA?
+b. How will the RPIC and VO(s) maintain VLOS with the sUA if the control link is lost?
+c. How does this procedure account for all areas where the sUA will be
+operated?
+d. If the control link is lost, how will the RPIC ensure the sUA will not fly over other
+people?
+3
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.29 Operation at Night
+The following section is for operators who need to fly at night or during periods of civil
+twilight without functioning anti-collision lighting visible for at least 3 statute miles that
+has a flash rate sufficient to avoid a collision.
+1. Please provide the following information:
+a. Is your small unmanned aircraft (sUA) equipped with anti-collision lighting?
+If no, see Guidelines 2 and 3;
+If yes, continue to 1b
+b. Is the anti-collision lighting visible for at least 3 miles?
+If no, see Guidelines 2 and 3;
+If yes, continue to 1c
+c. Do the anti-collision lights flash?
+If no, see Guidelines 2 and 3;
+If yes, continue to 1d
+d. Will the anti-collision lights be functioning during the intended flight?
+If no, see Guidelines 2 and 3
+Note: If “yes” is answered to all the above questions, you may be able to operate in
+compliance with the requirements of §107.29 without a waiver.
+2. If you answered “no” to any portion of Guideline 1, explain why you need to fly while
+not complying with the lighting requirements of §107.29, and describe in detail any
+mitigating factors such as location or supplemental lighting.
+3. If you answered “no” to any portion of Guideline 1, describe any technology, crew
+resource management, and/or procedural safety precautions you will use to prevent
+other aircraft from colliding with your small unmanned aircraft (sUA) when not
+flying in compliance with the lighting requirements of §107.29.
+4
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.31 Visual Line of Sight Aircraft Operation
+1. General
+a. Describe how the remote pilot in command (RPIC) will be able to continuously know
+and determine the position, altitude, and movement of the small Unmanned
+Aircraft (sUA).
+b. Describe how the RPIC will ensure the sUA remains in the area of intended
+operation. How will this be verified?
+c. Describe how the RPIC ensures the operation will not go beyond the capabilities of
+the command and control link. How will that be tested and verified?
+d. What is the route of flight? What factors, with regards to the route of flight, will
+affect command and control, flight over people/moving vehicles/obstructions, etc.?
+e. Does the sUA have a return to home (RTH) function? If so, how does the RPIC ensure
+the sUA does not overfly people/vehicles or collide with obstructions during the RTH
+flight?
+2. Detect and Avoid (DAA)
+a. How will the RPIC monitor the airspace surrounding the operation of the sUA to
+remain well clear of other aircraft?
+b. Will a Detect and Avoid (DAA) system be used with the operation?
+1) What type of DAA system is to be used? RADAR / ACOUSTIC / VISUAL?
+2) Is the DAA system ground based or airborne?
+3) Is the DAA system compliant with the Industry Based DAA Performance
+Standard or a combination of standards? i.e. portions of RTCA and
+portions of ASTM
+4) If the DAA is ground based, is there adequate low altitude DAA
+coverage to support the operation?
+5) What is the maximum distance the system is effective in detecting
+other aircraft?
+6) Has the DAA system been tested and proven reliable in the desired
+operating environment?
+7) What is the maximum altitude above ground level the sUA will be flown
+during this operation?
+8) What is the avoidance strategy?
+9) If avoidance is automated, what safeguards are there to protect the
+system from undesired behavior?
+10) Describe how the RPIC interfaces with the DAA system to monitor the
+airspace and manage the DAA operation?
+11) What is the minimum distance for detection so that the avoidance
+strategy can be carried out?
+5
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+12) If using an obstruction/shielded DAA concept of operations, what is the
+shielding criteria?
+13) What are the DAA system operating limitations?
+14) How will ADS-B IN be integrated into the DAA system?
+15) What is the alerting criteria for non-cooperative intruders and ADS-B
+equipped intruders?
+16) Describe how the system visibly and audibly alerts the RPIC of
+operating area intruders?
+17) Is there visible and audible alerting for DAA system
+failures/degradation?
+c. Describe how the RPIC monitors the surface of the operating area to ensure the sUA
+will not overfly people or moving vehicles or how the sUA has been determined
+sufficiently safe to operate over people or moving vehicles (i.e Cat. 1-4 compliant,
+safe operational history, impact mitigation such as a parachute, or restricted
+operational areas).
+d. If conducting obstruction/shielded operations, how are safe states defined?
+e. If using VO(s) with the operation, will the VO(s) be able to maintain visual
+surveillance of 2 statute miles (sm) around the sUA’s position, and/or be able to
+maintain VLOS with the sUA at all times?
+3. Lighting
+a. Describe the anti-collision lighting used on the sUA, in order for it to be seen by
+crewmembers in other aircraft from a distance of at least 1 statute mile (sm) during
+daytime operations and 3sm if conducting nighttime operations.
+4. Alerts
+a. Describe how the RPIC will be alerted of a degraded function or failure of the sUAS.
+b. Will there be an audible and visual alert of the degraded function or failure as
+required by industry standards?
+c. What are the procedures in the event of a degraded function or failure of the sUAS?
+d. What are the C2 lost link procedures?
+5. Training
+a. Describe how the responsible person will ensure that relevant knowledge is
+required of all persons participating in the operation.
+b. What training will be required for the operation?
+c. How will the training be documented and maintained?
+6
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+6. Weather
+a. What are the weather limitations on the sUA to be operated?
+b. How will you determine the weather conditions at the launch and recovery site as
+well as along the intended route ?
+c. How will you comply with 107.51?
+7. Command and Control
+a. Describe the command and control link of the sUAS.
+b. Is the command and control link configuration FCC approved? If so, please provide
+the approval number?
+7
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.33 Visual Observer
+1. Describe how you will account for the communication latency between the Visual
+Observer(s) (VO) and the Remote Pilot in Command (RPIC).
+a. How will the RPIC and VO(s) communicate with each other if they are not near
+each other?
+b. If this communication method fails, how will the RPIC and VO(s) be alerted to the
+failure?
+c. What will the RPIC and VO(s) do if a communication failure occurs?
+Note: A VO may not be required for certain part 107 operations. If a VO is part of your
+operation, § 107.31 requires that all VO(s) be able to see the small unmanned aircraft
+(sUA) throughout the duration of the flight. You may need a waiver to certain portions of
+§ 107.33 (specifically § 107.33(b) and § 107.33(c)(2)) if your operation requires the use of
+multiple VOs, not all of which will be able to maintain visual line of sight with your sUA.
+An example of operations where this may apply is when using a daisy-chain of VOs
+(where VO(s) maintain direct visual contact with the sUA throughout the entire flight in
+place of the RPIC doing so).
+8
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.35 Operation of Multiple Small Unmanned Aircraft (sUA)
+1. Describe how the operation will remain safe during a failure of single and multiple
+small unmanned aircraft (sUA) simultaneously.
+a. How does the system simultaneously control multiple participating sUA and
+prevent them from colliding with each other?
+b. How will the system ensure individual participating sUA remain
+contained in the pre-determined operational area?
+c. How will the Remote Pilot in Command (RPIC) see and avoid, or detect and avoid,
+all other aircraft when operating multiple sUA?
+d. Will the proposed operations use one or more Visual Observers (VO)?
+e. How will the RPIC safely stop all participating sUA in the event of a hazard?
+f. How will the RPIC know when a single sUA has failed, and how will he/she
+respond?
+g. How will the RPIC respond to multiple sUA failing at the same time?
+h. What additional preflight safety procedures would the RPIC undergo to ensure
+safe operation?
+• For example, preflight computer simulations, personnel training.
+i. How many command and control links and procedures does the system use?
+j. Do the sUA communicate with each other? If so, what path do the
+communications follow?
+k. How do the system and/or individual sUA respond when
+communications fail?
+l. How will the RPIC maintain a stand-off distance (buffer zone) from non-
+participating people or property?
+9
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.37 Operation Near Aircraft; Right-of-Way Rules
+1. Describe how all manned aircraft pilots are able to detect and avoid the small
+unmanned aircraft (sUA) and know they must yield the right-of-way to the sUA.
+a. How will operators of other aircraft know they need to give way to your sUA in
+flight?
+2. What procedure will you use to ensure the operator of the manned aircraft is aware
+the sUA does not need to yield the right-of-way?
+a. How will operators of other aircraft visually locate your sUA inflight?
+10
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.39 Operation over Human Beings
+The following section is for operators who need to fly over human beings with a small
+unmanned aircraft (sUA) that will not meet the requirements of subpart D of part 107.
+NOTE: sUA that weigh 0.55 pounds or less and are equipped with shielded rotating parts
+(i.e., prop guards) that will prevent lacerations to human skin do not require a waiver.
+1. Describe the proposed operation in detail.
+2. What is the takeoff weight of the sUA, including payload and the required equipage
+listed below? Express this number to the nearest hundredth pound (i.e., 0.85 lbs., 1.52
+lbs.).
+To obtain a waiver to operate over human beings, the FAA now requires additional
+equipage, which increases the takeoff weight of the sUA. Depending on the sUA’s takeoff
+weight, a Parachute Recovery System conforming to the ASTM F3322–18 (or newer)
+standard may be required and, if so, must be included in the weight calculation. There may
+be differences in the special provisions of the issued waiver and handling of the waiver
+application. Operators must add the weight of the following required equipage to derive
+the takeoff weight:
+a) Anti-collision light to increase the conspicuity of the sUA to at least one statute mile
+for daytime operations and three statute miles for civil twilight and night
+operations, for collision avoidance purposes,
+b) Remote ID broadcast module (unless the drone is on the FAA-accepted DOC
+standard remote ID list found on uasdoc.faa.gov),
+c) Mechanism to shield or prevent rotating parts from causing lacerations to human
+skin, and
+d) A Parachute Recovery System (PRS) conforming to the ASTM F3322–18 (or newer)
+standard if the takeoff weight of the sUA, its payload, the anti-collision light, RID,
+and rotating parts shielding mechanism is more than 0.88 pounds. For those cases,
+add the weight of the PRS to the total takeoff weight.
+Note: If the takeoff weight of the sUA’s payload, including the anti-collision light, RID,
+rotating parts shielding mechanism, and, if required, a Parachute Recovery System, is more
+than 3.50 pounds, the waiver application will be evaluated on a case-by-case basis.
+Additional details about the proposed operation and safety justification may be required.
+11
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.51(a) Operating Limitations for Small Unmanned Aircraft:
+Groundspeed
+1. Describe how you will ensure that a loss of control of the small unmanned aircraft
+(sUA) at higher speeds poses no additional hazard or explain how any additional
+hazard to other aircraft, people, or property on the ground will be controlled or
+eliminated.
+a. How will the Remote Pilot in Command (RPIC) ensure the sUA, flying over 87
+knots/100 mph, will not increase the likelihood of the sUA hitting another
+aircraft, person, or property?
+b. How will the RPIC maintain visual line of sight of the sUA as prescribed in §107.31,
+when it is flying over 87 knots/100 mph?
+2. Describe the anti-collision lighting on the sUA, in order for it to be seen by
+crewmembers in other aircraft from a distance of at least 1 statute mile (sm)
+during daytime operations and 3sm if conducting nighttime operations.
+a. Will the sUA be sufficiently visible by crewmembers in other aircraft in the
+location where the RPIC will operate?
+1) If yes, how will you accomplish this?
+2) If no, why do crewmembers in other aircraft not need to be able to see your
+sUA?
+12
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.51(b) Operating Limitations for Small Unmanned Aircraft:
+Altitude
+1. Describe how the small unmanned aircraft (sUA) will not pose a hazard to aircraft,
+persons on the ground, and others’ property when operating at altitudes other
+than those prescribed in § 107.51(b).
+a. How will the Remote Pilot in Command (RPIC) and Visual Observer(s) (VO), if
+used, see and avoid other aircraft when flying over 400 feet above ground
+level (AGL)?
+2. Describe the anti-collision lighting used on the sUA, in order for it to be seen
+by crewmembers in other aircraft from a distance of at least 1 statute mile
+(sm) during daytime operations and 3sm if conducting nighttime operations.
+a. Will the sUA be sufficiently visible by crewmembers in other aircraft in the
+location where the RPIC will operate?
+1) If yes, how will you accomplish this?
+2) If no, why do crewmembers in other aircraft not need to be able to see your
+sUA?
+3. Describe how the RPIC will be able to accurately determine the sUA altitude
+and direction of flight.
+a. How will the RPIC know, while keeping eyes on the sUA, the current real-time:
+1) Geographic location,
+2) Altitude (AGL), and
+3) Direction of flight of the sUA
+b. How will the RPIC maintain visual line of sight with the sUA (i.e., meet the
+requirements of § 107.31) at the maximum altitude and distance requested in
+the waiver application?
+4. Describe the area of operations using latitude/longitude, street address,
+identifiable landmarks, or other maps to include the distance from and direction to
+the nearest airport (e.g., 4.8 miles SE of XYZ Airport).
+5. In addition to filing a NOTAM, describe how the RPIC will communicate/coordinate
+with Air Traffic Control (ATC) if required by a Special Provision in your Certificate of
+Waiver and based on the complexity of your operation.
+13
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.51(c) Operating Limitations for Small Unmanned Aircraft:
+Minimum Flight Visibility
+1. Describe how the Remote Pilot in Command (RPIC) will be able to maintain visual
+line of sight (VLOS) with the small unmanned aircraft (sUA) when operating with
+visibility less than 3 statute miles (sm).
+a. How will the RPIC maintain VLOS of the sUA when visibility is reduced?
+b. What is the maximum distance the sUA will be visible to the RPIC, Visual
+Observer(s), and other aircraft?
+1) How was that visibility determined?
+2. Describe how, and what procedures will be used to ensure, the sUA will be able to
+avoid non-participating aircraft when operating with visibility less than 3sm.
+a. How will the RPIC see and avoid, or detect and avoid, non-participating
+aircraft when the ground or flight visibility is less than 3sm?
+3. Describe the anti-collision lighting used on the sUA, in order for it to be seen
+by crewmembers in other aircraft from a distance of at least 1sm during
+daytime operations and 3sm if conducting nighttime operations.
+a. Will the sUA be sufficiently visible by crewmembers in other aircraft in the
+location where the RPIC will operate?
+1) If yes, how will you accomplish this?
+2) If no, why do crewmembers in other aircraft not need to be able to see your
+sUA?
+14
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.51(d) Operating Limitations for Small Unmanned Aircraft:
+Cloud Clearance
+1. Describe how the Remote Pilot in Command (RPIC) will be able to maintain visual
+line of sight with the small unmanned aircraft (sUA) when operating closer to
+clouds than the distances prescribed in § 107.51(d).
+a. How will the RPIC know when the sUA is flying too close to the clouds and
+prevent accidental flight into the clouds?
+b. What is the maximum vertical distance the sUA will be visible to the RPIC,
+Visual Observer(s), and other aircraft?
+1) How was that visibility determined?
+2. Describe how the RPIC will be able to locate and avoid non participating aircraft
+when operating closer to clouds than the distances prescribed in § 107.51(d).
+a. How will the RPIC see and avoid other aircraft that may be flying in the clouds
+or be hidden from view because of the clouds?
+3. Describe the anti-collision lighting used on the sUA, in order for it to be seen
+by crewmembers in other aircraft from a distance of at least 1 statute mile
+(sm) during daytime operations and 3sm if conducting nighttime operations.
+a. Will the sUA be sufficiently visible by crewmembers in other aircraft in the
+location where the RPIC will operate?
+1) If yes, how will you accomplish this?
+2) If no, why do crewmembers in other aircraft not need to be able to see your
+sUA?
+15
+107 WSEGs and GQs - (06-14-2024) - (TOC)
+§ 107.145 Operation over Moving Vehicles
+The following section is for operators who need to fly over human beings located inside
+a moving vehicle with a small unmanned aircraft (sUA) that will not meet the
+requirements of subpart D of part 107.
+NOTE: sUA that weigh 0.55 pounds or less and are equipped with shielded rotating parts
+(i.e., prop guards) that will prevent lacerations to human skin do not require a waiver.
+1. Describe the proposed operation in detail.
+2. What is the takeoff weight of the sUA, including payload and the required equipage
+listed below? Express this number to the nearest hundredth pound (i.e., 0.85 lbs., 1.52
+lbs.).
+To obtain a waiver to operate over human beings located inside a moving vehicle, the FAA
+now requires additional equipage, which increases the takeoff weight of the sUA. Depending
+on the sUA’s takeoff weight, a Parachute Recovery System conforming to the ASTM F3322–
+18 (or newer) standard may be required and, if so, must be included in the weight
+calculation. There may be differences in the special provisions of the issued waiver and
+handling of the waiver application. Operators must add the weight of the following
+required equipage to derive the takeoff weight:
+a) Anti-collision light to increase the conspicuity of the sUA to at least one statute
+mile for daytime operations and three statute miles for civil twilight and night
+operations, for collision avoidance purposes,
+b) Remote ID broadcast module (unless the drone is on the FAA-accepted DOC
+standard remote ID list found on uasdoc.faa.gov),
+c) Mechanism to shield or prevent rotating parts from causing lacerations to
+human skin, and
+d) A Parachute Recovery System (PRS) conforming to the ASTM F3322–18 (or
+newer) standard if the takeoff weight of the sUA, its payload, the anti-collision
+light, RID, and rotating parts shielding mechanism is more than 0.88 pounds. For
+those cases, add the weight of the PRS to the total takeoff weight.
+Note: If the takeoff weight of the sUA’s payload, including the anti-collision light, RID,
+rotating parts shielding mechanism, and, if required, Parachute Recovery System, is more
+than 3.50 pounds, the waiver application will be evaluated on a case-by-case basis.
+Additional details about the proposed operation and safety justification may be required.

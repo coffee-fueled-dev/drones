@@ -1,0 +1,21 @@
+{
+  "name": "@drone/mcp",
+  "version": "0.1.0-beta.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/**/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "context": "bun run --filter @tkn/scripts context"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {},
+  "trustedDependencies": [],
+  "dependencies": {
+    "fastmcp": "^3.17.0"
+  }
+}
