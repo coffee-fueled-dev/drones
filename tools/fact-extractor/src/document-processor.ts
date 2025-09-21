@@ -55,6 +55,11 @@ export class DocumentProcessor {
     this.outputData.globalContext = this.factAgent.context;
     this.outputData.facts = this.factAgent.getAllFacts();
     this.outputData.metadata.lastUpdated = new Date().toISOString();
+    console.log(
+      `[${new Date(Date.now()).toLocaleTimeString()}][${this.outputPath}][${
+        this.outputData.facts.length
+      } facts]`
+    );
     await this.writeOutput();
   }
 

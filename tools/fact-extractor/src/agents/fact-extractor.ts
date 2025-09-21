@@ -8,11 +8,18 @@ export const FactSchema = z.object({
   subject: z.string().describe("The subject of the fact."),
   object: z.string().describe("The object of the fact."),
   verb: z.string().describe("The verb of the fact."),
+  description: z
+    .string()
+    .nullable()
+    .describe(
+      "Optionally describe any context that is necessary to understand the fact."
+    ),
   source: z
     .string()
     .describe(
       "A pointer to the specific source in the document of the fact. " +
-        "A reader should be able to locate the fact in the original document using this pointer."
+        "A reader should be able to locate the fact in the original document using this pointer. " +
+        "A good pointer would be a legitimate reference to a section, article, line, or other specific part of the document."
     ),
 });
 
@@ -26,7 +33,8 @@ export const FactResponseSchema = z.object({
         "For example:" +
         "\nThe document title should be added to global context." +
         "\nThe document purpose should be added to global context." +
-        "\nAny of your own insights about the document content should be added to global context"
+        "\nAny of your own insights about the document content should be added to global context" +
+        "\nWhen something is added to global context, it should be understandable in the global sense -- meaning outside of the context of the current document chun or frame of referencek."
     ),
   facts: z
     .array(FactSchema)

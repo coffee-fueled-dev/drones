@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const DOCS_DIR = path.resolve(__dirname, "docs");
 
 // Configuration for intelligent chunking
-const CHUNK_SIZE_THRESHOLD = 2000; // Characters threshold for processing chunks
+const CHUNK_SIZE_THRESHOLD = 1000; // Characters threshold for processing chunks
 
 for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   const resolved = path.join(DOCS_DIR, entry);
