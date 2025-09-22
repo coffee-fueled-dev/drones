@@ -10,7 +10,10 @@ const __dirname = path.dirname(__filename);
 const DOCS_DIR = path.resolve(__dirname, "docs");
 
 // Configuration for intelligent chunking
-const CHUNK_SIZE_THRESHOLD = 1000; // Characters threshold for processing chunks
+const CHUNK_SIZE_THRESHOLD = 2000; // Characters threshold for processing chunks
+
+// Enable Graphiti integration (set to true to send episodes to Graphiti server)
+const ENABLE_GRAPHITI = process.env.ENABLE_GRAPHITI === "true";
 
 for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   const resolved = path.join(DOCS_DIR, entry);
@@ -20,10 +23,16 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   const processor = new DocumentProcessor(
     factAgent,
     file,
-    CHUNK_SIZE_THRESHOLD
+    CHUNK_SIZE_THRESHOLD,
+    ENABLE_GRAPHITI
   );
 
   console.log(`\n=== Processing ${entry} ===`);
+  if (ENABLE_GRAPHITI) {
+    console.log(
+      "📊 Graphiti integration enabled - episodes will be sent to knowledge graph"
+    );
+  }
 
   await processor.start();
 
@@ -94,10 +103,11 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
     await processor.processChunk(accumulatedChunk.trim());
   }
 
-  const { context, facts, outputPath } = await processor.finalize();
+  const { context, factsPath, metadataPath } = await processor.finalize();
   console.log(`\n=== Completed ${entry} ===`);
-  console.log(`Output written to: ${outputPath}`);
+  console.log(`Output written to: ${factsPath}`);
+  console.log(`Metadata written to: ${metadataPath}`);
   console.log(
-    `Final stats: ${chunkCount} chunks processed, ${context.length} context items, ${facts.length} facts`
+    `Final stats: ${chunkCount} chunks processed, ${context.length} context items, ${factsPath.length} facts`
   );
 }

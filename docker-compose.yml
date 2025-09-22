@@ -1,0 +1,60 @@
+services:
+  neo4j:
+    build: ./packages/neo4j
+    container_name: neo4j
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASS:-password}
+      NEO4J_PLUGINS: '["apoc", "genai", "apoc-extended"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_trigger_enabled: "true"
+      NEO4J_apoc_trigger_refresh: "60000"
+      NEO4J_dbms_security_procedures_unrestricted: "*"
+      NEO4J_server_memory_pagecache_size: "1000M"
+      NEO4J_server_memory_heap_max__size: "1000M"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    networks:
+      - bloom-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASS:-password}", "RETURN 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  graphiti-server:
+    build: ./packages/api/graphiti
+    container_name: graphiti-server
+    ports:
+      - "8000:8000"
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=${NEO4J_USER:-neo4j}
+      - NEO4J_PASSWORD=${NEO4J_PASS:-password}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SEMAPHORE_LIMIT=${SEMAPHORE_LIMIT:-5}
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - bloom-network
+    restart: unless-stopped
+
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+
+networks:
+  bloom-network:
+    driver: bridge 

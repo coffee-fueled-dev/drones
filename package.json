@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "context": "bun run --filter @cfd/scripts context",
-    "facts:all": "bun run --elide-lines 0 --env-file ./.env --filter @cfd/fact-extractor all"
+    "facts:extract": "ENABLE_GRAPHITI=true bun run --elide-lines 0 --env-file ./.env --filter @cfd/fact-extractor all",
+    "facts:extract:local": "ENABLE_GRAPHITI=false bun run --elide-lines 0 --env-file ./.env --filter @cfd/fact-extractor all"
   },
   "devDependencies": {
     "@types/bun": "latest"

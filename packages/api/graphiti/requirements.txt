@@ -1,0 +1,15 @@
+# Core dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# Graphiti and graph database
+graphiti-core>=0.20.0
+neo4j>=5.26.0
+
+# OpenAI for LLM and embeddings
+openai>=1.0.0
+
+# Additional utilities
+python-multipart>=0.0.6
+httpx>=0.25.0
