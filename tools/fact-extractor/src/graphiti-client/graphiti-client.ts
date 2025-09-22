@@ -1,4 +1,4 @@
-import type { Fact } from "./agents";
+import type { Fact } from "../agents";
 
 export interface GraphitiEpisode {
   content: {

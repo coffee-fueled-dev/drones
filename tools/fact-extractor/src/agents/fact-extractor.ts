@@ -53,8 +53,8 @@ export const FactResponseSchema = z.object({
     ),
   facts: z
     .array(FactSchema)
-    .min(7)
-    .max(20)
+    .min(3)
+    .max(10)
     .describe(
       "A list of facts extracted from the last section of content provided to you. " +
         "A fact should contain one subject, one object, and one verb. " +
@@ -76,7 +76,7 @@ export class FactExtractionAgent extends FileAgent {
   private readonly _currentContext: string[] = [];
   private readonly _facts: Fact[] = [];
   private _currentModelIndex = 0;
-  private readonly _maxContextSize = 10; // Limit context to last 10 entries
+  private readonly _maxContextSize = 6; // Reduced to keep prompts smaller
   private readonly _maxFactsInMemory = 1000; // Flush facts when we hit this limit
   private readonly _extractionTimeout: number; // Timeout for extraction in milliseconds
 
@@ -133,12 +133,20 @@ export class FactExtractionAgent extends FileAgent {
           })`
         );
 
+        // Use only the last 3 context entries to keep prompts smaller
         const contextEntries =
-          this._globalContext.length > 5 ? 5 : this._globalContext.length;
+          this._globalContext.length > 3 ? 3 : this._globalContext.length;
 
         const context = this._globalContext
           .slice(this._globalContext.length - contextEntries)
           .join("\n");
+
+        // Log request size for debugging
+        const totalPromptLength =
+          chunk.length + context.length + this._currentContext.join("").length;
+        console.log(
+          `[FactExtractor] 📏 Request size: chunk=${chunk.length} chars, context=${context.length} chars, total≈${totalPromptLength} chars`
+        );
 
         const response = await this._openai.responses.parse({
           model,

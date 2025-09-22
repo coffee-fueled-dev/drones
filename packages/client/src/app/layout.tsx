@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { AuthKitProvider } from "@workos-inc/authkit-react";
 import { env } from "@/lib/env";
 import "./globals.css";
