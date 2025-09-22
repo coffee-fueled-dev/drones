@@ -1,5 +1,16 @@
+import type { Fact } from "./agents";
+
 export interface GraphitiEpisode {
-  content: any;
+  content: {
+    facts: Fact[];
+    metadata: {
+      filename: string;
+      filepath: string;
+      chunkIndex?: number;
+      globalContext?: string[];
+      currentContext?: string[];
+    };
+  };
   name?: string;
   description?: string;
   reference_time?: string;
@@ -176,12 +187,13 @@ export class GraphitiClient {
    * Create an episode from fact extraction results
    */
   createFactsEpisode(
-    facts: any[],
+    facts: Fact[],
     metadata: {
       filename: string;
       filepath: string;
       chunkIndex?: number;
       globalContext?: string[];
+      currentContext?: string[];
     }
   ): GraphitiEpisode {
     const episodeName = metadata.chunkIndex
@@ -191,11 +203,7 @@ export class GraphitiClient {
     return {
       content: {
         facts,
-        metadata: {
-          ...metadata,
-          source: "fact-extractor",
-          extractedAt: new Date().toISOString(),
-        },
+        metadata,
       },
       name: episodeName,
       description: `Facts extracted from ${metadata.filename}${

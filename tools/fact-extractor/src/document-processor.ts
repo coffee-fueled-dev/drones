@@ -97,7 +97,7 @@ export class DocumentProcessor {
 
   /** Update output file with latest facts and context */
   private async updateOutput() {
-    this.outputData.globalContext = this.factAgent.context;
+    this.outputData.globalContext = this.factAgent.globalContext;
 
     // Get new facts since last update (this prevents unbounded accumulation)
     const newFacts = this.factAgent.flushFacts();
@@ -110,7 +110,7 @@ export class DocumentProcessor {
 
     // Append new facts to the JSONL file
     if (newFacts.length > 0) {
-      await this.appendFacts(newFacts);
+      await this.appendFacts(newFacts, this.factAgent.currentContext);
     }
 
     // Get total fact count for logging
@@ -147,12 +147,14 @@ export class DocumentProcessor {
   }
 
   /** Append new facts to the JSONL facts file */
-  private async appendFacts(facts: Fact[]) {
+  private async appendFacts(facts: Fact[], currentContext: string[]) {
     if (facts.length === 0) return;
 
     // Convert facts to JSONL format (one JSON object per line)
     const jsonlLines =
-      facts.map((fact) => JSON.stringify(fact)).join("\n") + "\n";
+      facts
+        .map((fact) => JSON.stringify({ ...fact, currentContext }))
+        .join("\n") + "\n";
 
     // Append to the facts file
     const file = Bun.file(this.factsPath);
@@ -165,6 +167,7 @@ export class DocumentProcessor {
     const metadata = {
       ...this.outputData.metadata,
       globalContext: this.outputData.globalContext,
+      currentContext: this.factAgent.currentContext,
       totalChunks: this.chunkCounter,
       estimatedChunks: this.estimatedChunks,
       factsFile: "facts.jsonl",
@@ -211,6 +214,7 @@ export class DocumentProcessor {
       filepath: this.outputData.metadata.filepath,
       chunkIndex: this.chunkCounter,
       globalContext: this.outputData.globalContext,
+      currentContext: this.factAgent.currentContext,
     });
 
     // Send async (fire and forget) - this won't block the processing
@@ -265,7 +269,8 @@ export class DocumentProcessor {
     console.log(`   ├── metadata.json`);
 
     return {
-      context: this.factAgent.context,
+      context: this.factAgent.globalContext,
+      currentContext: this.factAgent.currentContext,
       outputDir: this.outputDir,
       factsPath: this.factsPath,
       metadataPath: this.metadataPath,

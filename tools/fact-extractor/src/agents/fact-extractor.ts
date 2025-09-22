@@ -23,10 +23,9 @@ export const FactSchema = z.object({
     ),
   source: z
     .string()
+    .nullable()
     .describe(
-      "A pointer to the specific source in the document of the fact. " +
-        "A reader should be able to locate the fact in the original document using this pointer. " +
-        "A good pointer would be a legitimate reference to a section, article, line, or other specific part of the document."
+      "Attribute the fact to a specific location in the document, a table, a page, a figure, a section, etc."
     ),
 });
 
@@ -42,6 +41,14 @@ export const FactResponseSchema = z.object({
         "\nThe document purpose should be added to global context." +
         "\nAny of your own insights about the document content should be added to global context" +
         "\nWhen something is added to global context, it should be understandable in the global sense -- meaning outside of the context of the current document chun or frame of referencek."
+    ),
+  currentContext: z
+    .array(z.string())
+    .max(2)
+    .describe(
+      "The current context of the document you're processing. " +
+        "Use the current context for locating facts within the document as a whole. " +
+        "Current context should be a list of two phrases. One, like 'I am currently reading about...' AND another, like 'This is continuing the previous context of...'"
     ),
   facts: z
     .array(FactSchema)
@@ -62,7 +69,8 @@ const models: OpenAI.ResponsesModel[] = [
 ] as const;
 
 export class FactExtractionAgent extends FileAgent {
-  private readonly _context: string[] = [];
+  private readonly _globalContext: string[] = [];
+  private readonly _currentContext: string[] = [];
   private readonly _facts: Fact[] = [];
   private _currentModelIndex = 0;
   private readonly _maxContextSize = 10; // Limit context to last 10 entries
@@ -113,10 +121,10 @@ export class FactExtractionAgent extends FileAgent {
         );
 
         const contextEntries =
-          this._context.length > 5 ? 5 : this._context.length;
+          this._globalContext.length > 5 ? 5 : this._globalContext.length;
 
-        const context = this._context
-          .slice(this._context.length - contextEntries)
+        const context = this._globalContext
+          .slice(this._globalContext.length - contextEntries)
           .join("\n");
 
         const response = await this._openai.responses.parse({
@@ -135,6 +143,14 @@ export class FactExtractionAgent extends FileAgent {
                 "DOCUMENT CONTEXT:\n\n" +
                 (context.length ? context : "No additional information"),
             },
+            {
+              role: "assistant",
+              content:
+                "CURRENT CONTEXT:\n\n" +
+                (this._currentContext.length
+                  ? this._currentContext
+                  : "No additional information"),
+            },
             { role: "user", content: chunk },
           ],
           text: {
@@ -144,9 +160,16 @@ export class FactExtractionAgent extends FileAgent {
 
         const out = response.output_parsed;
         if (out?.globalContext?.length) {
-          this._context.push(...out.globalContext);
+          this._globalContext.push(...out.globalContext);
           // Trim context to prevent memory leak
           this.trimContext();
+        }
+        if (out?.currentContext?.length) {
+          this._currentContext.splice(
+            0,
+            this._currentContext.length - 1,
+            ...out.currentContext
+          );
         }
         if (out?.facts?.length) {
           this._facts.push(...out.facts);
@@ -214,10 +237,10 @@ export class FactExtractionAgent extends FileAgent {
    * Trim context to prevent unbounded memory growth
    */
   private trimContext(): void {
-    if (this._context.length > this._maxContextSize) {
-      const removed = this._context.splice(
+    if (this._globalContext.length > this._maxContextSize) {
+      const removed = this._globalContext.splice(
         0,
-        this._context.length - this._maxContextSize
+        this._globalContext.length - this._maxContextSize
       );
       console.log(
         `[FactExtractor] 🧹 Trimmed ${removed.length} old context entries (keeping last ${this._maxContextSize})`
@@ -261,8 +284,12 @@ export class FactExtractionAgent extends FileAgent {
   /** Get all accumulated facts without draining them. */
   getAllFacts = () => [...this._facts];
 
-  get context() {
-    return [...this._context];
+  get globalContext() {
+    return [...this._globalContext];
+  }
+
+  get currentContext() {
+    return [...this._currentContext];
   }
 
   /** Get the currently selected model */
