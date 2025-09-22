@@ -9,13 +9,7 @@ export class FileAgent {
   }
 
   start = async (file: Bun.BunFile) => {
-    if (this._conversation !== undefined) return this;
-    this._conversation = await this._openai.conversations.create({
-      metadata: {
-        fileName: file.name ?? "unknown file",
-      },
-    });
-
+    // Stateless processing - no conversation needed
     return this;
   };
 }

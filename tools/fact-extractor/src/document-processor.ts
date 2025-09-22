@@ -11,16 +11,75 @@ interface OutputData {
     lastUpdated: string;
     chunkSizeThreshold: number;
   };
-  globalContext: string[];
 }
 
 export class DocumentProcessor {
+  /** Load existing metadata to determine resume position */
+  static async getResumePosition(file: Bun.BunFile): Promise<number> {
+    try {
+      const filename = path.basename(file.name || "unknown.txt");
+      const baseName = filename.replace(/\.[^/.]+$/, "");
+      const sourceDir = path.dirname(file.name || ".");
+      const outputDir = path.join(sourceDir, baseName);
+      const metadataPath = path.join(outputDir, "metadata.json");
+
+      const metadataFile = Bun.file(metadataPath);
+      if (await metadataFile.exists()) {
+        const metadata = await metadataFile.json();
+        return metadata.characterPosition || 0;
+      }
+    } catch (error) {
+      console.warn("Could not load existing metadata for resume:", error);
+    }
+    return 0;
+  }
+
+  /** Load existing global context for resuming */
+  static async getExistingGlobalContext(file: Bun.BunFile): Promise<string[]> {
+    try {
+      const filename = path.basename(file.name || "unknown.txt");
+      const baseName = filename.replace(/\.[^/.]+$/, "");
+      const sourceDir = path.dirname(file.name || ".");
+      const outputDir = path.join(sourceDir, baseName);
+      const globalContextPath = path.join(outputDir, "global_context.jsonl");
+
+      const globalContextFile = Bun.file(globalContextPath);
+      if (await globalContextFile.exists()) {
+        const content = await globalContextFile.text();
+        if (!content.trim()) return [];
+
+        // Parse all entries and extract just the content, keeping only last 5
+        const entries = content
+          .trim()
+          .split("\n")
+          .filter((line) => line.trim())
+          .map((line) => {
+            try {
+              return JSON.parse(line).content;
+            } catch {
+              return null;
+            }
+          })
+          .filter((content) => content !== null);
+
+        // Return only the last 5 entries
+        return entries.slice(-5);
+      }
+    } catch (error) {
+      console.warn("Could not load existing global context for resume:", error);
+    }
+    return [];
+  }
+
   private factsPath: string;
+  private globalContextPath: string;
   private metadataPath: string;
   private outputDir: string;
   private outputData: OutputData;
   private chunkCounter = 0;
   private estimatedChunks = 0;
+  private characterPosition = 0;
+  private lastFiveGlobalContext: string[] = [];
   private graphitiClient?: GraphitiClient;
   private graphitiAvailable = false;
   private factsFileHandle?: Bun.BunFile;
@@ -29,7 +88,9 @@ export class DocumentProcessor {
     private readonly factAgent: FactExtractionAgent,
     private readonly file: Bun.BunFile,
     private readonly chunkSizeThreshold: number = 2000,
-    private readonly enableGraphiti: boolean = false
+    private readonly enableGraphiti: boolean = false,
+    private readonly resumeFromPosition: number = 0,
+    private readonly existingGlobalContext: string[] = []
   ) {
     const filename = path.basename(file.name || "unknown.txt");
     const baseName = filename.replace(/\.[^/.]+$/, "");
@@ -40,6 +101,7 @@ export class DocumentProcessor {
 
     // Create separate files within the folder
     this.factsPath = path.join(this.outputDir, "facts.jsonl");
+    this.globalContextPath = path.join(this.outputDir, "global_context.jsonl");
     this.metadataPath = path.join(this.outputDir, "metadata.json");
 
     this.outputData = {
@@ -50,8 +112,13 @@ export class DocumentProcessor {
         lastUpdated: new Date().toISOString(),
         chunkSizeThreshold: this.chunkSizeThreshold,
       },
-      globalContext: [],
     };
+
+    // Set starting character position for resume functionality
+    this.characterPosition = this.resumeFromPosition;
+
+    // Initialize with existing global context if resuming
+    this.lastFiveGlobalContext = [...this.existingGlobalContext];
 
     // Initialize Graphiti client if enabled
     if (this.enableGraphiti) {
@@ -89,15 +156,58 @@ export class DocumentProcessor {
   }
 
   /** Feed a paragraph; emits fact extraction when a semantic boundary is hit. */
-  processChunk = async (para: string) => {
+  processChunk = async (para: string, chunkStartPosition?: number) => {
     this.chunkCounter++;
-    await this.factAgent.extract(para);
-    await this.updateOutput();
+    if (chunkStartPosition !== undefined) {
+      this.characterPosition = chunkStartPosition;
+    } else {
+      this.characterPosition += para.length;
+    }
+
+    // Set up a process-level timeout that will forcefully terminate if extraction hangs
+    const processTimeoutMs = 35000; // 35 seconds - slightly longer than extraction timeout
+    const processTimeout = setTimeout(() => {
+      console.error(
+        `FORCED TERMINATION: Chunk ${this.chunkCounter} at position ${this.characterPosition} exceeded ${processTimeoutMs}ms`
+      );
+      console.error(
+        `To resume, run: RESUME_FROM_POSITION=${this.characterPosition} bun run start`
+      );
+      console.error(`Failed chunk preview: ${para.substring(0, 200)}...`);
+      process.exit(2); // Exit with code 2 to indicate timeout termination
+    }, processTimeoutMs);
+
+    try {
+      await this.factAgent.extract(para);
+      clearTimeout(processTimeout);
+      await this.updateOutput();
+    } catch (error) {
+      clearTimeout(processTimeout);
+      console.error(
+        `❌ Error processing chunk ${this.chunkCounter} at position ${this.characterPosition}:`,
+        error
+      );
+      // Log the chunk content for debugging
+      console.error(`📄 Chunk content preview: ${para.substring(0, 200)}...`);
+      console.error(
+        `🔄 To resume, run: RESUME_FROM_POSITION=${this.characterPosition} bun run start`
+      );
+      throw error;
+    }
   };
 
   /** Update output file with latest facts and context */
   private async updateOutput() {
-    this.outputData.globalContext = this.factAgent.globalContext;
+    const currentGlobalContext = this.factAgent.globalContext;
+
+    // Detect new global context entries by comparing with our last known state
+    const newGlobalContext = currentGlobalContext.filter((entry) => {
+      // Only consider it "new" if it's not in our last known state
+      return !this.lastFiveGlobalContext.includes(entry);
+    });
+
+    // Update our tracking to only keep last 5 entries
+    this.lastFiveGlobalContext = [...currentGlobalContext.slice(-5)];
 
     // Get new facts since last update (this prevents unbounded accumulation)
     const newFacts = this.factAgent.flushFacts();
@@ -108,6 +218,14 @@ export class DocumentProcessor {
         ? ` (${this.chunkCounter}/${this.estimatedChunks})`
         : "";
 
+    // Append new global context to JSONL file
+    if (newGlobalContext.length > 0) {
+      console.log(
+        `[DocumentProcessor] 📝 Detected ${newGlobalContext.length} new context entries out of ${currentGlobalContext.length} total`
+      );
+      await this.appendGlobalContext(newGlobalContext);
+    }
+
     // Append new facts to the JSONL file
     if (newFacts.length > 0) {
       await this.appendFacts(newFacts, this.factAgent.currentContext);
@@ -115,11 +233,18 @@ export class DocumentProcessor {
 
     // Get total fact count for logging
     const totalFacts = await this.getTotalFactCount();
+    const totalGlobalContext = await this.getTotalGlobalContextCount();
 
     console.log(
       `[${new Date(Date.now()).toLocaleTimeString()}] Chunk ${
         this.chunkCounter
-      }${progressInfo}: ${totalFacts} total facts (+${newFacts.length} new)`
+      }${progressInfo} @ pos ${
+        this.characterPosition
+      }: ${totalFacts} total facts (+${
+        newFacts.length
+      } new), ${totalGlobalContext} context items (+${
+        newGlobalContext.length
+      } new)`
     );
 
     // Update metadata file
@@ -139,8 +264,24 @@ export class DocumentProcessor {
       console.log(`📁 Created output directory: ${this.outputDir}`);
     }
 
-    // Clear facts file (start fresh)
-    await Bun.write(this.factsPath, "");
+    // If resuming, don't clear files
+    if (this.resumeFromPosition === 0) {
+      // Clear files (start fresh)
+      await Bun.write(this.factsPath, "");
+      await Bun.write(this.globalContextPath, "");
+      console.log(`🆕 Starting fresh extraction`);
+    } else {
+      console.log(
+        `🔄 Resuming extraction from position ${this.resumeFromPosition}`
+      );
+      // Initialize agent with existing global context
+      if (this.existingGlobalContext.length > 0) {
+        this.factAgent.restoreGlobalContext(this.existingGlobalContext);
+        console.log(
+          `📄 Restored ${this.existingGlobalContext.length} global context items`
+        );
+      }
+    }
 
     // Write initial metadata
     await this.updateMetadata();
@@ -150,10 +291,20 @@ export class DocumentProcessor {
   private async appendFacts(facts: Fact[], currentContext: string[]) {
     if (facts.length === 0) return;
 
-    // Convert facts to JSONL format (one JSON object per line)
+    // Convert facts to JSONL format with cursor metadata (one JSON object per line)
+    const timestamp = new Date().toISOString();
+    const chunkIndex = this.chunkCounter;
     const jsonlLines =
       facts
-        .map((fact) => JSON.stringify({ ...fact, currentContext }))
+        .map((fact) =>
+          JSON.stringify({
+            ...fact,
+            currentContext,
+            timestamp,
+            chunkIndex,
+            characterPosition: this.characterPosition,
+          })
+        )
         .join("\n") + "\n";
 
     // Append to the facts file
@@ -162,15 +313,43 @@ export class DocumentProcessor {
     await Bun.write(this.factsPath, existingContent + jsonlLines);
   }
 
+  /** Append new global context entries to the JSONL global context file */
+  private async appendGlobalContext(contextEntries: string[]) {
+    if (contextEntries.length === 0) return;
+
+    // Convert context entries to JSONL format with timestamp
+    const timestamp = new Date().toISOString();
+    const chunkIndex = this.chunkCounter;
+    const jsonlLines =
+      contextEntries
+        .map((entry) =>
+          JSON.stringify({
+            content: entry,
+            timestamp,
+            chunkIndex,
+            characterPosition: this.characterPosition,
+          })
+        )
+        .join("\n") + "\n";
+
+    // Append to the global context file
+    const file = Bun.file(this.globalContextPath);
+    const existingContent = await file.text();
+    await Bun.write(this.globalContextPath, existingContent + jsonlLines);
+  }
+
   /** Update the metadata file */
   private async updateMetadata() {
     const metadata = {
       ...this.outputData.metadata,
-      globalContext: this.outputData.globalContext,
       currentContext: this.factAgent.currentContext,
       totalChunks: this.chunkCounter,
       estimatedChunks: this.estimatedChunks,
+      characterPosition: this.characterPosition,
       factsFile: "facts.jsonl",
+      globalContextFile: "global_context.jsonl",
+      status: "processing",
+      lastChunkProcessedAt: new Date().toISOString(),
     };
 
     await Bun.write(this.metadataPath, JSON.stringify(metadata, null, 2));
@@ -180,6 +359,22 @@ export class DocumentProcessor {
   private async getTotalFactCount(): Promise<number> {
     try {
       const content = await Bun.file(this.factsPath).text();
+      if (!content.trim()) return 0;
+
+      // Count non-empty lines in JSONL file
+      return content
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim()).length;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  /** Get total count of global context entries from the JSONL file */
+  private async getTotalGlobalContextCount(): Promise<number> {
+    try {
+      const content = await Bun.file(this.globalContextPath).text();
       if (!content.trim()) return 0;
 
       // Count non-empty lines in JSONL file
@@ -213,7 +408,7 @@ export class DocumentProcessor {
       filename: this.outputData.metadata.filename,
       filepath: this.outputData.metadata.filepath,
       chunkIndex: this.chunkCounter,
-      globalContext: this.outputData.globalContext,
+      globalContext: this.lastFiveGlobalContext,
       currentContext: this.factAgent.currentContext,
     });
 
@@ -266,7 +461,11 @@ export class DocumentProcessor {
     console.log(`📊 Total facts extracted: ${totalFacts}`);
     console.log(`📁 Output directory: ${this.outputDir}`);
     console.log(`   ├── facts.jsonl`);
-    console.log(`   ├── metadata.json`);
+    console.log(`   ├── global_context.jsonl`);
+    console.log(`   └── metadata.json`);
+
+    // Mark as completed in metadata
+    await this.markCompleted();
 
     return {
       context: this.factAgent.globalContext,
@@ -276,6 +475,24 @@ export class DocumentProcessor {
       metadataPath: this.metadataPath,
     };
   };
+
+  /** Mark processing as completed in metadata */
+  private async markCompleted() {
+    const metadata = {
+      ...this.outputData.metadata,
+      currentContext: this.factAgent.currentContext,
+      totalChunks: this.chunkCounter,
+      estimatedChunks: this.estimatedChunks,
+      characterPosition: this.characterPosition,
+      factsFile: "facts.jsonl",
+      globalContextFile: "global_context.jsonl",
+      status: "completed",
+      completedAt: new Date().toISOString(),
+      lastChunkProcessedAt: new Date().toISOString(),
+    };
+
+    await Bun.write(this.metadataPath, JSON.stringify(metadata, null, 2));
+  }
 
   /** Load all facts from the JSONL file */
   private async loadAllFacts(): Promise<Fact[]> {

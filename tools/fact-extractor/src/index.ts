@@ -10,24 +10,57 @@ const __dirname = path.dirname(__filename);
 const DOCS_DIR = path.resolve(__dirname, "docs");
 
 // Configuration for intelligent chunking
-const CHUNK_SIZE_THRESHOLD = 2000; // Characters threshold for processing chunks
+const CHUNK_SIZE_THRESHOLD = 3000; // Characters threshold for processing chunks
 
 // Enable Graphiti integration (set to true to send episodes to Graphiti server)
 const ENABLE_GRAPHITI = process.env.ENABLE_GRAPHITI === "true";
+
+// Resume from position (set to resume processing from a specific character position)
+const RESUME_FROM_POSITION = parseInt(
+  process.env.RESUME_FROM_POSITION || "0",
+  10
+);
+
+// Extraction timeout in milliseconds (default: 30 seconds)
+const EXTRACTION_TIMEOUT = parseInt(
+  process.env.EXTRACTION_TIMEOUT || "30000",
+  10
+);
 
 for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   const resolved = path.join(DOCS_DIR, entry);
   const file = Bun.file(resolved);
 
-  const factAgent = new FactExtractionAgent();
+  // Determine resume position: use env var, or load from existing metadata
+  let resumePosition = RESUME_FROM_POSITION;
+  let existingGlobalContext: string[] = [];
+
+  if (resumePosition === 0) {
+    resumePosition = await DocumentProcessor.getResumePosition(file);
+  }
+
+  // Load existing global context if resuming
+  if (resumePosition > 0) {
+    existingGlobalContext = await DocumentProcessor.getExistingGlobalContext(
+      file
+    );
+  }
+
+  const factAgent = new FactExtractionAgent(EXTRACTION_TIMEOUT);
   const processor = new DocumentProcessor(
     factAgent,
     file,
     CHUNK_SIZE_THRESHOLD,
-    ENABLE_GRAPHITI
+    ENABLE_GRAPHITI,
+    resumePosition,
+    existingGlobalContext
   );
 
   console.log(`\n=== Processing ${entry} ===`);
+  if (resumePosition > 0) {
+    console.log(`🔄 Resuming from character position ${resumePosition}`);
+  }
+  console.log(`⏰ Extraction timeout: ${EXTRACTION_TIMEOUT}ms`);
   if (ENABLE_GRAPHITI) {
     console.log(
       "📊 Graphiti integration enabled - episodes will be sent to knowledge graph"
@@ -42,6 +75,8 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   let carry = "";
   let accumulatedChunk = "";
   let chunkCount = 0;
+  let currentPosition = 0;
+  let skippedToResumePosition = resumePosition === 0;
 
   // Stream bytes and decode incrementally (handles multi-byte splits at chunk boundaries)
   for await (const chunk of Unicode.stream(file)) {
@@ -57,6 +92,22 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
       const para = carry.slice(0, idx).trim();
 
       if (para) {
+        // Update current position
+        currentPosition += para.length + 1; // +1 for the newline
+
+        // Skip content until we reach resume position
+        if (!skippedToResumePosition) {
+          if (currentPosition < resumePosition) {
+            // Skip this paragraph - we haven't reached resume position yet
+            continue;
+          } else {
+            skippedToResumePosition = true;
+            console.log(
+              `🎯 Reached resume position at character ${currentPosition}`
+            );
+          }
+        }
+
         // Add paragraph to accumulated chunk
         if (accumulatedChunk) {
           accumulatedChunk += "\n" + para;
@@ -67,11 +118,32 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
         // Check if we should process the accumulated chunk
         if (accumulatedChunk.length >= CHUNK_SIZE_THRESHOLD) {
           chunkCount++;
+          const chunkStartPosition = currentPosition - accumulatedChunk.length;
           console.log(
-            `Processing chunk ${chunkCount} (${accumulatedChunk.length} chars)`
+            `Processing chunk ${chunkCount} (${accumulatedChunk.length} chars) @ pos ${chunkStartPosition}`
           );
-          await processor.processChunk(accumulatedChunk);
-          accumulatedChunk = "";
+
+          try {
+            await processor.processChunk(accumulatedChunk, chunkStartPosition);
+            accumulatedChunk = "";
+          } catch (error) {
+            console.error(
+              `💥 Failed at chunk ${chunkCount}, position ${chunkStartPosition}`
+            );
+            console.error(
+              `💡 To resume from this position, run: RESUME_FROM_POSITION=${chunkStartPosition} bun run start`
+            );
+
+            // Check if this is a timeout error and exit with code 2 for auto-resume
+            if (error instanceof Error && error.message.includes("timed out")) {
+              console.error(
+                `⏰ Timeout detected - exiting with code 2 for auto-resume`
+              );
+              process.exit(2);
+            }
+
+            throw error;
+          }
         }
       }
 
@@ -95,12 +167,33 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   }
 
   // Process any remaining accumulated chunk
-  if (accumulatedChunk.trim()) {
+  if (accumulatedChunk.trim() && skippedToResumePosition) {
     chunkCount++;
+    const chunkStartPosition = currentPosition - accumulatedChunk.length;
     console.log(
-      `Processing final chunk ${chunkCount} (${accumulatedChunk.length} chars)`
+      `Processing final chunk ${chunkCount} (${accumulatedChunk.length} chars) @ pos ${chunkStartPosition}`
     );
-    await processor.processChunk(accumulatedChunk.trim());
+
+    try {
+      await processor.processChunk(accumulatedChunk.trim(), chunkStartPosition);
+    } catch (error) {
+      console.error(
+        `💥 Failed at final chunk ${chunkCount}, position ${chunkStartPosition}`
+      );
+      console.error(
+        `💡 To resume from this position, run: RESUME_FROM_POSITION=${chunkStartPosition} bun run start`
+      );
+
+      // Check if this is a timeout error and exit with code 2 for auto-resume
+      if (error instanceof Error && error.message.includes("timed out")) {
+        console.error(
+          `⏰ Timeout detected - exiting with code 2 for auto-resume`
+        );
+        process.exit(2);
+      }
+
+      throw error;
+    }
   }
 
   const { context, factsPath, metadataPath } = await processor.finalize();
@@ -108,6 +201,6 @@ for await (const entry of new Glob("**/*.txt").scan(DOCS_DIR)) {
   console.log(`Output written to: ${factsPath}`);
   console.log(`Metadata written to: ${metadataPath}`);
   console.log(
-    `Final stats: ${chunkCount} chunks processed, ${context.length} context items, ${factsPath.length} facts`
+    `Final stats: ${chunkCount} chunks processed, ${context.length} context items`
   );
 }

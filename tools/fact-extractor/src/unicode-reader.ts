@@ -60,16 +60,32 @@ export class Unicode {
     } else if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
       enc = "utf-16";
       offset = 2; // skip UTF-16LE BOM
-    } else {
-      enc = "windows-1252";
+    } else if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+      enc = "utf-16";
       offset = 2; // skip UTF-16BE BOM
+    } else {
+      // Fallback: check for UTF-16 by analyzing null byte patterns in first chunk
+      let nullCount = 0;
+      const sampleSize = Math.min(1000, bytes.length);
+      for (let i = 0; i < sampleSize; i++) {
+        if (bytes[i] === 0) nullCount++;
+      }
+
+      // If >40% null bytes, likely UTF-16 without BOM
+      if (nullCount > sampleSize * 0.4) {
+        enc = "utf-16";
+        offset = 0; // no BOM to skip
+      } else {
+        enc = "utf-8"; // default to utf-8 instead of windows-1252
+        offset = 0; // no BOM to skip
+      }
     }
     const decoder = new TextDecoder(enc, { fatal: false }); // set fatal:true if you prefer hard failures
 
     let buf: string[] = [];
 
     // Helper: push a sanitized string into buf, yielding in chunkCP pieces
-    const pushSanitized = (s: string): string[] => {
+    const pushSanitized = (s: string): string[][] => {
       // Normalize text form if requested
       if (normalize) s = s.normalize(normalize);
 
@@ -107,40 +123,58 @@ export class Unicode {
       // 4) Collapse runs of whitespace around newlines if you like (optional):
       // s = s.replace(/[ \t]+\n/g, "\n");
 
+      const chunks: string[][] = [];
       for (const ch of s) {
         buf.push(ch);
         if (buf.length >= chunkCP) {
-          const out = buf;
+          chunks.push([...buf]);
           buf = [];
-          return out;
         }
       }
-      return [];
+      return chunks;
     };
 
     // Process the first chunk
     if (offset) {
-      const chunk = pushSanitized(
+      const chunks = pushSanitized(
         decoder.decode(bytes.subarray(offset), { stream: true })
       );
-      if (chunk.length > 0) yield chunk;
+      for (const chunk of chunks) {
+        if (chunk.length > 0) yield chunk;
+      }
     } else {
-      const chunk = pushSanitized(decoder.decode(bytes, { stream: true }));
-      if (chunk.length > 0) yield chunk;
+      const chunks = pushSanitized(decoder.decode(bytes, { stream: true }));
+      for (const chunk of chunks) {
+        if (chunk.length > 0) yield chunk;
+      }
     }
 
     // Process remaining chunks
+    let chunkIndex = 1;
     while (true) {
       const nxt = await reader.read();
-      if (nxt.done) break;
-      const chunk = pushSanitized(decoder.decode(nxt.value!, { stream: true }));
-      if (chunk.length > 0) yield chunk;
+      if (nxt.done) {
+        break;
+      }
+      const chunks = pushSanitized(
+        decoder.decode(nxt.value!, { stream: true })
+      );
+      for (const chunk of chunks) {
+        if (chunk.length > 0) yield chunk;
+      }
+      chunkIndex++;
     }
 
     // Flush decoder remainder
-    const finalChunk = pushSanitized(decoder.decode());
-    if (finalChunk.length > 0) yield finalChunk;
+    const finalChunks = pushSanitized(decoder.decode());
+    for (const finalChunk of finalChunks) {
+      if (finalChunk.length > 0) {
+        yield finalChunk;
+      }
+    }
 
-    if (buf.length) yield buf;
+    if (buf.length) {
+      yield buf;
+    }
   }
 }

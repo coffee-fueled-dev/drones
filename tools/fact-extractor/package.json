@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "all": "bun run src/index.ts"
+    "all": "bun run src/index.ts",
+    "start": "bun run src/index.ts",
+    "auto-resume": "bun run auto-resume.ts"
   },
   "devDependencies": {},
   "peerDependencies": {},

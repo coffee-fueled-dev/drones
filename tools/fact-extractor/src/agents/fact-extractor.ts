@@ -33,6 +33,7 @@ export type FactResponse = z.infer<typeof FactResponseSchema>;
 export const FactResponseSchema = z.object({
   globalContext: z
     .array(z.string())
+    .max(3)
     .describe(
       "Anything that needs to be added to global context about the document you're processing." +
         "Something should be added to global context when it is necessary to understand subsequent portions of the document." +
@@ -52,6 +53,8 @@ export const FactResponseSchema = z.object({
     ),
   facts: z
     .array(FactSchema)
+    .min(7)
+    .max(20)
     .describe(
       "A list of facts extracted from the last section of content provided to you. " +
         "A fact should contain one subject, one object, and one verb. " +
@@ -75,6 +78,12 @@ export class FactExtractionAgent extends FileAgent {
   private _currentModelIndex = 0;
   private readonly _maxContextSize = 10; // Limit context to last 10 entries
   private readonly _maxFactsInMemory = 1000; // Flush facts when we hit this limit
+  private readonly _extractionTimeout: number; // Timeout for extraction in milliseconds
+
+  constructor(extractionTimeoutMs: number = 60000) {
+    super();
+    this._extractionTimeout = extractionTimeoutMs;
+  }
 
   // Ensure single-file serialization of extractions
   private readonly _extractionQ = new Queue({
@@ -84,15 +93,21 @@ export class FactExtractionAgent extends FileAgent {
 
   extract = async (chunk: string) =>
     new Promise<void>((resolve, reject) => {
+      // Set up timeout
+      const timeoutId = setTimeout(() => {
+        reject(
+          new Error(`Extraction timed out after ${this._extractionTimeout}ms`)
+        );
+      }, this._extractionTimeout);
+
       this._extractionQ.push(async (cb?: () => void) => {
         try {
-          if (!this._conversation)
-            throw new Error("No conversation initialized");
-
           // Try extraction with model rotation for rate limit handling
           await this.extractWithModelRotation(chunk);
+          clearTimeout(timeoutId);
           resolve();
         } catch (e) {
+          clearTimeout(timeoutId);
           reject(e);
         } finally {
           cb?.();
@@ -104,8 +119,6 @@ export class FactExtractionAgent extends FileAgent {
    * Extract facts with automatic model rotation on rate limits
    */
   private async extractWithModelRotation(chunk: string): Promise<void> {
-    if (!this._conversation) throw new Error("No conversation initialized");
-
     let lastError: Error | null = null;
 
     // Try each model in sequence when rate limited
@@ -129,7 +142,6 @@ export class FactExtractionAgent extends FileAgent {
 
         const response = await this._openai.responses.parse({
           model,
-          conversation: this._conversation.id,
           input: [
             {
               role: "system",
@@ -160,9 +172,13 @@ export class FactExtractionAgent extends FileAgent {
 
         const out = response.output_parsed;
         if (out?.globalContext?.length) {
+          const beforeLength = this._globalContext.length;
           this._globalContext.push(...out.globalContext);
-          // Trim context to prevent memory leak
-          this.trimContext();
+          // Trim global context to prevent unbounded growth
+          this.trimGlobalContext();
+          console.log(
+            `[FactExtractor] 📝 Added ${out.globalContext.length} context entries (${beforeLength} → ${this._globalContext.length})`
+          );
         }
         if (out?.currentContext?.length) {
           this._currentContext.splice(
@@ -184,6 +200,14 @@ export class FactExtractionAgent extends FileAgent {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
+        // Check if this is a timeout error - don't retry different models for timeouts
+        if (this.isTimeoutError(error)) {
+          console.error(
+            `[FactExtractor] ⏰ Timeout on model ${model} after ${this._extractionTimeout}ms`
+          );
+          throw error;
+        }
+
         // Check if this is a rate limit error
         if (this.isRateLimitError(error)) {
           console.warn(
@@ -197,7 +221,7 @@ export class FactExtractionAgent extends FileAgent {
           continue;
         }
 
-        // For non-rate-limit errors, fail immediately
+        // For other non-rate-limit errors, fail immediately
         console.error(`[FactExtractor] ❌ Error with model ${model}:`, error);
         throw error;
       }
@@ -227,6 +251,16 @@ export class FactExtractionAgent extends FileAgent {
   }
 
   /**
+   * Check if error is a timeout error
+   */
+  private isTimeoutError(error: unknown): boolean {
+    if (error instanceof Error) {
+      return error.message.includes("timed out");
+    }
+    return false;
+  }
+
+  /**
    * Sleep for specified milliseconds
    */
   private sleep(ms: number): Promise<void> {
@@ -234,16 +268,16 @@ export class FactExtractionAgent extends FileAgent {
   }
 
   /**
-   * Trim context to prevent unbounded memory growth
+   * Trim global context to prevent unbounded memory growth
    */
-  private trimContext(): void {
+  private trimGlobalContext(): void {
     if (this._globalContext.length > this._maxContextSize) {
       const removed = this._globalContext.splice(
         0,
         this._globalContext.length - this._maxContextSize
       );
       console.log(
-        `[FactExtractor] 🧹 Trimmed ${removed.length} old context entries (keeping last ${this._maxContextSize})`
+        `[FactExtractor] 🧹 Trimmed ${removed.length} old global context entries (keeping last ${this._maxContextSize})`
       );
     }
   }
@@ -292,6 +326,18 @@ export class FactExtractionAgent extends FileAgent {
     return [...this._currentContext];
   }
 
+  /** Restore global context when resuming processing */
+  restoreGlobalContext(existingContext: string[]) {
+    this._globalContext.splice(
+      0,
+      this._globalContext.length,
+      ...existingContext
+    );
+    console.log(
+      `[FactExtractor] 🔄 Restored ${existingContext.length} global context entries`
+    );
+  }
+
   /** Get the currently selected model */
   get currentModel(): string {
     return models[this._currentModelIndex];
@@ -300,5 +346,10 @@ export class FactExtractionAgent extends FileAgent {
   /** Get all available models */
   get availableModels(): readonly string[] {
     return models;
+  }
+
+  /** Get current extraction timeout in milliseconds */
+  get extractionTimeout(): number {
+    return this._extractionTimeout;
   }
 }
