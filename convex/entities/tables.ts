@@ -21,5 +21,6 @@ export const sharedTables = {
 
   users: defineTable(withoutSystemFields(UserSchema.fields))
     .index("by_name", ["name"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_workosUserId", ["workosUserId"]),
 };

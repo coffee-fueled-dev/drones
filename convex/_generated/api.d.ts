@@ -8,7 +8,21 @@
  * @module
  */
 
+import type * as agent_agents_config from "../agent/agents/config.js";
+import type * as agent_agents_index from "../agent/agents/index.js";
+import type * as agent_agents_models from "../agent/agents/models.js";
+import type * as agent_agents_operator from "../agent/agents/operator.js";
+import type * as agent_internal_actions from "../agent/internal/actions.js";
+import type * as agent_internal_mutations from "../agent/internal/mutations.js";
+import type * as agent_internal_workflows from "../agent/internal/workflows.js";
+import type * as agent_libs_authorizeThreadAccess from "../agent/libs/authorizeThreadAccess.js";
+import type * as agent_public_mutations from "../agent/public/mutations.js";
+import type * as agent_public_queries from "../agent/public/queries.js";
+import type * as agent_tools_index from "../agent/tools/index.js";
+import type * as agent_tools_searchThreadMessages from "../agent/tools/searchThreadMessages.js";
+import type * as agent_tools_updateThreadTitle from "../agent/tools/updateThreadTitle.js";
 import type * as entities_tables from "../entities/tables.js";
+import type * as shared_repository from "../shared/repository.js";
 import type * as shared_systemFields from "../shared/systemFields.js";
 import type * as workflow from "../workflow.js";
 
@@ -27,7 +41,21 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "agent/agents/config": typeof agent_agents_config;
+  "agent/agents/index": typeof agent_agents_index;
+  "agent/agents/models": typeof agent_agents_models;
+  "agent/agents/operator": typeof agent_agents_operator;
+  "agent/internal/actions": typeof agent_internal_actions;
+  "agent/internal/mutations": typeof agent_internal_mutations;
+  "agent/internal/workflows": typeof agent_internal_workflows;
+  "agent/libs/authorizeThreadAccess": typeof agent_libs_authorizeThreadAccess;
+  "agent/public/mutations": typeof agent_public_mutations;
+  "agent/public/queries": typeof agent_public_queries;
+  "agent/tools/index": typeof agent_tools_index;
+  "agent/tools/searchThreadMessages": typeof agent_tools_searchThreadMessages;
+  "agent/tools/updateThreadTitle": typeof agent_tools_updateThreadTitle;
   "entities/tables": typeof entities_tables;
+  "shared/repository": typeof shared_repository;
   "shared/systemFields": typeof shared_systemFields;
   workflow: typeof workflow;
 }>;

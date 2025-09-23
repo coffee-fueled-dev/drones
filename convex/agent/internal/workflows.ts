@@ -22,31 +22,20 @@ export const setupNewThread = workflow.define({
         internal.agent.internal.actions.updateThreadTitle,
         {
           threadId,
-        },
+        }
       );
       promisedSteps.push(updateThreadStepPromise);
     }
 
-    if (profile.type === "hardware-brand") {
-      const addThreadToHardwareBrandProfileStepPromise = step.runMutation(
-        internal.profiles.internal.mutations.addThreadToHardwareBrandProfile,
+    if (profile.type === "operator") {
+      const addThreadToOperatorProfileStepPromise = step.runMutation(
+        internal.agent.internal.mutations.addThreadToOperatorProfile,
         {
           profileId: profile.id,
           threadId,
-        },
+        }
       );
-      promisedSteps.push(addThreadToHardwareBrandProfileStepPromise);
-    }
-
-    if (profile.type === "service-partner") {
-      const addThreadToServicePartnerProfileStepPromise = step.runMutation(
-        internal.profiles.internal.mutations.addThreadToServicePartnerProfile,
-        {
-          profileId: profile.id,
-          threadId,
-        },
-      );
-      promisedSteps.push(addThreadToServicePartnerProfileStepPromise);
+      promisedSteps.push(addThreadToOperatorProfileStepPromise);
     }
 
     await Promise.all(promisedSteps);

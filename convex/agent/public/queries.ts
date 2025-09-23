@@ -1,14 +1,13 @@
 import { components } from "../../_generated/api";
 import { paginationOptsValidator } from "convex/server";
-import { query } from "../../customFunctions";
+import { query } from "../../_generated/server";
 import { authorizeThreadAccess } from "../libs/authorizeThreadAccess";
 import { getThreadMetadata, vStreamArgs } from "@convex-dev/agent";
 import { Infer, v, Validator } from "convex/values";
-import { UserRepository } from "../../id_auth/adapters/User.repository";
-import { GenericAgent } from "../agents/GenericAgent/agent";
+import { UserRepository } from "../../entities/user.repository";
+import { OperatorAgent } from "../agents/operator";
 import { ProfileSelectorSchema } from "./mutations";
-import { HardwareBrandProfileRepository } from "../../profiles/adapters/HardwareBrandProfile.repository";
-import { ServicePartnerProfileRepository } from "../../profiles/adapters/ServicePartnerProfile.repository";
+import { operatorProfileRepository } from "../../entities/operator.repository";
 
 type Thread = Infer<typeof ThreadSchema>;
 const ThreadSchema = v.object({
@@ -82,12 +81,12 @@ export const listMessages = query({
   handler: async (ctx, args) => {
     const { threadId, paginationOpts, streamArgs, workosUserId } = args;
     await authorizeThreadAccess(ctx, workosUserId, threadId);
-    const streams = await GenericAgent.syncStreams(ctx, {
+    const streams = await OperatorAgent.syncStreams(ctx, {
       threadId,
       streamArgs,
       includeStatuses: ["aborted", "streaming"],
     });
-    const paginated = await GenericAgent.listMessages(ctx, {
+    const paginated = await OperatorAgent.listMessages(ctx, {
       threadId,
       paginationOpts,
     });
@@ -120,25 +119,15 @@ export const listThreadsByProfile = query({
 
     let threadIds: string[] = [];
 
-    if (profile.type === "hardware-brand") {
-      const hbProfile = await HardwareBrandProfileRepository.get(
+    if (profile.type === "operator") {
+      const operatorProfile = await operatorProfileRepository.get(
         ctx,
         profile.id
       );
-      if (!hbProfile) {
-        throw new Error("Hardware brand profile not found");
+      if (!operatorProfile) {
+        throw new Error("Operator profile not found");
       }
-      threadIds = hbProfile.threads ?? [];
-    }
-    if (profile.type === "service-partner") {
-      const spProfile = await ServicePartnerProfileRepository.get(
-        ctx,
-        profile.id
-      );
-      if (!spProfile) {
-        throw new Error("Service partner profile not found");
-      }
-      threadIds = spProfile.threads ?? [];
+      threadIds = operatorProfile.threads ?? [];
     }
 
     const threads = await Promise.all(

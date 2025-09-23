@@ -1,24 +1,18 @@
 import { v } from "convex/values";
 import { components, internal } from "../../_generated/api";
 import { abortStream, createThread } from "@convex-dev/agent";
-import { mutation } from "../../customFunctions";
+import { mutation } from "../../_generated/server";
 import { authorizeThreadAccess } from "../libs/authorizeThreadAccess";
-import { UserRepository } from "../../id_auth/adapters/User.repository";
-import { NewUserSchema } from "../../id_auth/domain/User.entity";
-import { ToolConfigSchema, Agents } from "../agents";
+import { UserRepository } from "../../entities/user.repository";
+import { NewUserSchema } from "../../entities/user.domain";
+import { ToolConfigSchema, OperatorAgent } from "../agents";
 import { workflow } from "../../workflow";
 import { Message } from "@convex-dev/agent/validators";
 
-export const ProfileSelectorSchema = v.union(
-  v.object({
-    type: v.literal("hardware-brand"),
-    id: v.id("hardwareBrandProfiles"),
-  }),
-  v.object({
-    type: v.literal("service-partner"),
-    id: v.id("servicePartnerProfiles"),
-  }),
-);
+export const ProfileSelectorSchema = v.object({
+  type: v.literal("operator"),
+  id: v.id("operatorProfiles"),
+});
 
 export const createNewThread = mutation({
   args: {
@@ -28,7 +22,7 @@ export const createNewThread = mutation({
       v.object({
         prompt: v.string(),
         context: v.optional(v.string()),
-      }),
+      })
     ),
     profile: ProfileSelectorSchema,
   },
@@ -37,7 +31,7 @@ export const createNewThread = mutation({
   }),
   handler: async (ctx, { user, toolConfig, initialMessage, profile }) => {
     const userId = await UserRepository.upsert(ctx, user);
-    const agent = Agents[toolConfig?.agentName ?? "generic-agent"];
+    const agent = OperatorAgent;
 
     const threadId = await createThread(ctx, components.agent, {
       userId,
@@ -65,8 +59,8 @@ export const createNewThread = mutation({
             threadId,
             message,
             skipEmbeddings,
-          }),
-        ),
+          })
+        )
       );
 
       await ctx.scheduler.runAfter(
@@ -76,8 +70,7 @@ export const createNewThread = mutation({
           threadId,
           promptMessageId:
             scheduledMessages[scheduledMessages.length - 1].messageId,
-          toolConfig,
-        },
+        }
       );
     }
 
@@ -88,7 +81,7 @@ export const createNewThread = mutation({
         threadId,
         profile,
         setTitle: initialMessage !== undefined,
-      },
+      }
     );
 
     return { threadId };
@@ -120,19 +113,15 @@ export const scheduleMessage = mutation({
   args: {
     threadId: v.string(),
     workosUserId: v.string(),
-    toolConfig: v.optional(ToolConfigSchema),
     prompt: v.string(),
     context: v.optional(v.string()),
   },
   returns: v.object({
     threadId: v.string(),
   }),
-  handler: async (
-    ctx,
-    { threadId, workosUserId, toolConfig, prompt, context },
-  ) => {
+  handler: async (ctx, { threadId, workosUserId, prompt, context }) => {
     await authorizeThreadAccess(ctx, workosUserId, threadId);
-    const agent = Agents[toolConfig?.agentName ?? "generic-agent"];
+    const agent = OperatorAgent;
 
     const messages: { message: Message; skipEmbeddings: boolean }[] = [];
 
@@ -154,8 +143,8 @@ export const scheduleMessage = mutation({
           threadId,
           message,
           skipEmbeddings: true,
-        }),
-      ),
+        })
+      )
     );
 
     await ctx.scheduler.runAfter(
@@ -165,8 +154,7 @@ export const scheduleMessage = mutation({
         threadId,
         promptMessageId:
           scheduledMessages[scheduledMessages.length - 1].messageId,
-        toolConfig,
-      },
+      }
     );
 
     return { threadId };

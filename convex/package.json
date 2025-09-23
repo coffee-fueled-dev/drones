@@ -11,12 +11,5 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {},
-  "trustedDependencies": [],
-  "dependencies": {
-    "@ai-sdk/openai": "^2.0.32",
-    "@convex-dev/agent": "^0.2.10",
-    "@convex-dev/workflow": "^0.2.6",
-    "convex": "^1.27.1",
-    "convex-helpers": "^0.1.104"
-  }
+  "trustedDependencies": []
 }
