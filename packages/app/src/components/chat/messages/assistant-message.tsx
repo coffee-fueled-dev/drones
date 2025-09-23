@@ -17,17 +17,17 @@ export const AssistantMessage = ({ message }: { message: UIMessage }) => {
                 />
               );
 
-            case "tool-invocation":
-              return (
-                <ToolInvocationPart
-                  key={index}
-                  args={part.toolInvocation.args}
-                  toolName={part.toolInvocation.toolName}
-                  result={part.toolInvocation.result || ""}
-                  state={part.toolInvocation.state}
-                  toolCallId={part.toolInvocation.toolCallId}
-                />
-              );
+            // case "tool-invocation":
+            //   return (
+            //     <ToolInvocationPart
+            //       key={index}
+            //       args={part.toolInvocation.args}
+            //       toolName={part.toolInvocation.toolName}
+            //       result={part.toolInvocation.result || ""}
+            //       state={part.toolInvocation.state}
+            //       toolCallId={part.toolInvocation.toolCallId}
+            //     />
+            //   );
 
             default:
               return null;

@@ -1,36 +1,35 @@
 import { v } from "convex/values";
-import { components, internal } from "../../_generated/api";
-import { abortStream, createThread } from "@convex-dev/agent";
-import { mutation } from "../../_generated/server";
-import { authorizeThreadAccess } from "../libs/authorizeThreadAccess";
-import { UserRepository } from "../../entities/user.repository";
-import { NewUserSchema } from "../../entities/user.domain";
-import { ToolConfigSchema, OperatorAgent } from "../agents";
-import { workflow } from "../../workflow";
+import { components, internal } from "../../../_generated/api";
+import { abortStream, createThread, listStreams } from "@convex-dev/agent";
+import { mutation } from "../../../_generated/server";
+import { authorizeThreadAccess } from "../../libs";
+import { UserRepository } from "../../../entities/user.repository";
+import { OperatorAgent } from "../../operator";
+import { workflow } from "../../../workflow";
 import { Message } from "@convex-dev/agent/validators";
-
-export const ProfileSelectorSchema = v.object({
-  type: v.literal("operator"),
-  id: v.id("operatorProfiles"),
-});
+import { internalMutation } from "../../../customFunctions";
 
 export const createNewThread = mutation({
   args: {
-    user: NewUserSchema,
-    toolConfig: v.optional(ToolConfigSchema),
+    workosUserId: v.string(),
     initialMessage: v.optional(
       v.object({
         prompt: v.string(),
         context: v.optional(v.string()),
       })
     ),
-    profile: ProfileSelectorSchema,
   },
   returns: v.object({
     threadId: v.string(),
   }),
-  handler: async (ctx, { user, toolConfig, initialMessage, profile }) => {
-    const userId = await UserRepository.upsert(ctx, user);
+  handler: async (ctx, { workosUserId, initialMessage }) => {
+    // User should already exist from OAuth callback
+    const user = await UserRepository.findByExternalId(ctx, workosUserId);
+    if (!user) {
+      throw new Error("User not found. Please sign in again.");
+    }
+
+    const userId = user._id;
     const agent = OperatorAgent;
 
     const threadId = await createThread(ctx, components.agent, {
@@ -65,7 +64,7 @@ export const createNewThread = mutation({
 
       await ctx.scheduler.runAfter(
         0,
-        internal.agent.internal.actions.streamAsync,
+        internal.agent.operations.actions.thread.streamAsync,
         {
           threadId,
           promptMessageId:
@@ -76,10 +75,10 @@ export const createNewThread = mutation({
 
     await workflow.start(
       ctx,
-      internal.agent.internal.workflows.setupNewThread,
+      internal.agent.operations.workflows.thread.setupNewThread,
       {
         threadId,
-        profile,
+        userId,
         setTitle: initialMessage !== undefined,
       }
     );
@@ -149,7 +148,7 @@ export const scheduleMessage = mutation({
 
     await ctx.scheduler.runAfter(
       0,
-      internal.agent.internal.actions.streamAsync,
+      internal.agent.operations.actions.thread.streamAsync,
       {
         threadId,
         promptMessageId:
@@ -158,5 +157,59 @@ export const scheduleMessage = mutation({
     );
 
     return { threadId };
+  },
+});
+
+export const abortStreamByStreamId = internalMutation({
+  args: { threadId: v.string() },
+  handler: async (ctx, { threadId }) => {
+    const streams = await listStreams(ctx, components.agent, { threadId });
+    for (const stream of streams) {
+      console.log("Aborting stream", stream);
+      await abortStream(ctx, components.agent, {
+        reason: "Aborting via async call",
+        streamId: stream.streamId,
+      });
+    }
+    if (!streams.length) {
+      console.log("No streams found");
+    }
+  },
+});
+
+export const addThreadToUser = internalMutation({
+  args: {
+    userId: v.id("users"),
+    threadId: v.string(),
+  },
+  handler: async (ctx, { userId, threadId }) => {
+    const user = await UserRepository.get(ctx, userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const existingThreads = user.threads ?? [];
+    if (!existingThreads.includes(threadId)) {
+      await ctx.db.patch(userId, {
+        threads: [...existingThreads, threadId],
+      });
+    }
+  },
+});
+
+export const createOrUpdateUser = mutation({
+  args: {
+    workosUserId: v.string(),
+    email: v.string(),
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, { workosUserId, email, name }) => {
+    await UserRepository.upsert(ctx, {
+      workosUserId,
+      email,
+      name,
+      documents: [],
+      threads: [],
+    });
   },
 });

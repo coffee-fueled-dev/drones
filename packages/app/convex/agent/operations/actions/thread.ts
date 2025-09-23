@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import z from "zod";
-import { internalAction } from "../../_generated/server";
-import { OperatorAgent } from "../agents/operator";
+import { internalAction } from "../../../_generated/server";
+import { OperatorAgent } from "../../operator";
 
 export const streamAsync = internalAction({
   args: {

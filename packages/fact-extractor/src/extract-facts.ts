@@ -47,18 +47,9 @@ for (const filePath of textFiles) {
   const fileName = path.basename(filePath);
   console.log(`\n📄 Processing file: ${fileName}`);
 
-  // Generate description based on filename or use default
-  let description: string;
-  if (fileName.includes("2025-14992")) {
-    description =
-      "Notice of Proposed Rulemaking for Beyond Visual Line of Sight operations of Unmanned Aircraft Systems, focusing on performance-based regulations for low-altitude UAS operations.";
-  } else {
-    description = `Document processing for ${fileName}`;
-  }
-
   const config: RunnerConfig = {
     ...baseConfig,
-    description,
+    description: "",
   };
 
   const runner = new Runner(config);

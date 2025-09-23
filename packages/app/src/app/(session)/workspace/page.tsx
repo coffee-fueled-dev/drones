@@ -4,14 +4,7 @@ import { Chat } from "@/components/chat";
 import { SignOutButton } from "@/components/sign-out-button";
 
 export default async function WorkspacePage() {
-  await withAuth({ ensureSignedIn: true });
-
-  // For now, using a placeholder operator profile ID
-  // In a real app, you'd get this from the user's profile or selection
-  const mockProfile = {
-    id: "mock-operator-profile-id" as any,
-    type: "operator" as const,
-  };
+  await withAuth();
 
   return (
     <div className="h-screen flex flex-col">
@@ -23,10 +16,7 @@ export default async function WorkspacePage() {
 
       {/* Main chat area */}
       <div className="flex-1">
-        <ChatProvider
-          profile={mockProfile}
-          chatContext="Welcome to the drone policy advisor. Ask questions about drone regulations and compliance requirements."
-        >
+        <ChatProvider chatContext="Welcome to the drone policy advisor. Ask questions about drone regulations and compliance requirements.">
           <Chat>
             <div className="text-center">
               <h1 className="text-2xl font-bold mb-4">Drone Policy Advisor</h1>

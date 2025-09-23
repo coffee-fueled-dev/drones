@@ -25,10 +25,6 @@ export type SendMessageOptions = {
 
 interface ChatContextValue {
   chatContext?: string | Record<string, unknown>;
-  profile: {
-    id: Id<"operatorProfiles">;
-    type: "operator";
-  };
   threadId: string | null;
   isLoading: boolean;
   prompt: string;
@@ -45,22 +41,16 @@ const ChatContext = createContext<ChatContextValue | undefined>(undefined);
 
 interface ChatProviderProps {
   chatContext?: string | Record<string, unknown>;
-  profile: {
-    id: Id<"operatorProfiles">;
-    type: "operator";
-  };
   children: ReactNode;
 }
 
-export function ChatProvider({
-  profile,
-  children,
-  chatContext,
-}: ChatProviderProps) {
+export function ChatProvider({ children, chatContext }: ChatProviderProps) {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const createThread = useMutation(api.agent.public.mutations.createNewThread);
+  const createThread = useMutation(
+    api.agent.operations.mutations.thread.createNewThread
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
@@ -71,21 +61,21 @@ export function ChatProvider({
 
   // Thread messages hook - only active when we have both threadId and workosUserId
   const messages = useThreadMessages(
-    api.agent.public.queries.listMessages,
+    api.agent.operations.queries.thread.listMessages,
     threadId && workosUserId ? { threadId, workosUserId } : "skip",
     { initialNumItems: 10, stream: true }
   );
 
   // Send message mutation with optimistic updates
   const scheduleMessageMutation = useMutation(
-    api.agent.public.mutations.scheduleMessage
+    api.agent.operations.mutations.thread.scheduleMessage
   ).withOptimisticUpdate(
-    optimisticallySendMessage(api.agent.public.queries.listMessages)
+    optimisticallySendMessage(api.agent.operations.queries.thread.listMessages)
   );
 
   // Abort stream mutation
   const abortStreamByOrder = useMutation(
-    api.agent.public.mutations.abortStreamByOrder
+    api.agent.operations.mutations.thread.abortStreamByOrder
   );
 
   const switchThread = useCallback(
@@ -112,16 +102,7 @@ export function ChatProvider({
       setIsLoading(true);
       try {
         const newThread = await createThread({
-          profile,
-          user: {
-            name:
-              `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
-              user.email,
-            description: `User account for ${user.email}`,
-            email: user.email,
-            workosUserId: user.id,
-            role: "operator" as const,
-          },
+          workosUserId: user.id,
           initialMessage: initialMessage
             ? {
                 prompt: initialMessage,
@@ -143,7 +124,7 @@ export function ChatProvider({
         setIsLoading(false);
       }
     },
-    [createThread, user, router, searchParams, profile]
+    [createThread, user, router, searchParams, chatContext]
   );
 
   // Send message function - creates thread if none exists
@@ -187,7 +168,6 @@ export function ChatProvider({
 
   const value: ChatContextValue = {
     chatContext,
-    profile,
     threadId,
     isLoading,
     workosUserId,

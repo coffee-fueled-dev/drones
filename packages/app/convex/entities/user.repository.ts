@@ -1,11 +1,7 @@
 import { MutationCtx, QueryCtx } from "../_generated/server";
 import { createCoreRepositoryOperations } from "../shared/repository";
-import {
-  UserRepository as IUserRepository,
-  NewUserSchema,
-  User,
-} from "./user.domain";
-import { Infer } from "convex/values";
+import { IUserRepository, NewUser, User } from "./user.domain";
+import { Id } from "../_generated/dataModel";
 
 const baseRepository = createCoreRepositoryOperations("users");
 
@@ -22,10 +18,7 @@ export const UserRepository: IUserRepository = {
       .first();
   },
 
-  async upsert(
-    ctx: MutationCtx,
-    userData: Infer<typeof NewUserSchema>
-  ): Promise<string> {
+  async upsert(ctx: MutationCtx, userData: NewUser): Promise<Id<"users">> {
     const existingUser = await this.findByExternalId(
       ctx,
       userData.workosUserId
@@ -35,15 +28,15 @@ export const UserRepository: IUserRepository = {
       // Update existing user
       await ctx.db.patch(existingUser._id, {
         ...userData,
-        _updatedAt: Date.now(),
+        updatedAt: Date.now(),
       });
       return existingUser._id;
     } else {
       // Create new user
       const newUser = await ctx.db.insert("users", {
         ...userData,
-        _createdAt: Date.now(),
-        _updatedAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
       return newUser;
     }

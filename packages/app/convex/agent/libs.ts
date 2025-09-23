@@ -1,6 +1,6 @@
-import { QueryCtx } from "../../_generated/server";
-import { components } from "../../_generated/api";
-import { UserRepository } from "../../entities/user.repository";
+import { QueryCtx } from "../_generated/server";
+import { components } from "../_generated/api";
+import { UserRepository } from "../entities/user.repository";
 
 export async function authorizeThreadAccess(
   ctx: QueryCtx,

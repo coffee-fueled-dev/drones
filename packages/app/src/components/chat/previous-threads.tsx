@@ -21,12 +21,14 @@ import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const PreviousThreads = () => {
-  const { switchThread, profile, resetThread } = useChat();
+  const { switchThread, resetThread } = useChat();
   const { user } = useAuth();
-  const threads = useQuery(api.agent.public.queries.listThreadsByProfile, {
-    profile,
-    workosUserId: user?.id ?? "",
-  });
+  const threads = useQuery(
+    api.agent.operations.queries.thread.listThreadsByUser,
+    {
+      workosUserId: user?.id ?? "",
+    }
+  );
 
   return (
     <Sheet>

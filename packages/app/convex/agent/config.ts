@@ -1,5 +1,5 @@
 import { chat, textEmbedding } from "./models";
-import { searchThreadMessages, updateThreadTitle } from "../tools";
+import { searchThreadMessages, updateThreadTitle } from "./tools";
 
 export const defaultConfig = {
   chat,

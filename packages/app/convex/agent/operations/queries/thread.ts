@@ -1,13 +1,11 @@
-import { components } from "../../_generated/api";
+import { components } from "../../../_generated/api";
 import { paginationOptsValidator } from "convex/server";
-import { query } from "../../_generated/server";
-import { authorizeThreadAccess } from "../libs/authorizeThreadAccess";
+import { query } from "../../../_generated/server";
+import { authorizeThreadAccess } from "../../libs";
 import { getThreadMetadata, vStreamArgs } from "@convex-dev/agent";
 import { Infer, v, Validator } from "convex/values";
-import { UserRepository } from "../../entities/user.repository";
-import { OperatorAgent } from "../agents/operator";
-import { ProfileSelectorSchema } from "./mutations";
-import { operatorProfileRepository } from "../../entities/operator.repository";
+import { UserRepository } from "../../../entities/user.repository";
+import { OperatorAgent } from "../../operator";
 
 type Thread = Infer<typeof ThreadSchema>;
 const ThreadSchema = v.object({
@@ -39,7 +37,6 @@ const paginatedResponseSchema = <T>(itemSchema: Validator<T, any, any>) =>
 export const listThreads = query({
   args: {
     workosUserId: v.string(),
-    profile: ProfileSelectorSchema,
     paginationOpts: paginationOptsValidator,
   },
   returns: paginatedResponseSchema(ThreadSchema),
@@ -105,29 +102,24 @@ export const listMessages = query({
   },
 });
 
-export const listThreadsByProfile = query({
+export const listThreadsByUser = query({
   args: {
-    profile: ProfileSelectorSchema,
     workosUserId: v.string(),
   },
   returns: v.array(ThreadSchema),
   handler: async (ctx, args) => {
-    const { profile } = args;
     const user = await UserRepository.findByExternalId(ctx, args.workosUserId);
-    const userId = user?._id;
-    if (!userId) throw new Error("Unauthorized: user is required");
 
-    let threadIds: string[] = [];
+    // If user doesn't exist yet, return empty array (they haven't sent any messages)
+    if (!user) {
+      return [];
+    }
 
-    if (profile.type === "operator") {
-      const operatorProfile = await operatorProfileRepository.get(
-        ctx,
-        profile.id
-      );
-      if (!operatorProfile) {
-        throw new Error("Operator profile not found");
-      }
-      threadIds = operatorProfile.threads ?? [];
+    // Get thread IDs from the user's threads array
+    const threadIds: string[] = user.threads ?? [];
+
+    if (threadIds.length === 0) {
+      return [];
     }
 
     const threads = await Promise.all(
@@ -137,7 +129,7 @@ export const listThreadsByProfile = query({
     );
 
     return threads.filter(
-      (thread) => thread !== null && thread.userId === userId
+      (thread) => thread !== null && thread.userId === user._id
     ) as Thread[];
   },
 });

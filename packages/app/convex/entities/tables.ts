@@ -1,22 +1,23 @@
 import { defineTable } from "convex/server";
 import { withoutSystemFields } from "convex-helpers";
-import { OperatorProfileSchema } from "./operator.domain";
-import { LocationSchema } from "./location.domain";
-import { JobSchema } from "./job.domain";
 import { UserSchema } from "./user.domain";
+import { ChunkSchema } from "./chunk.domain";
+import { FactSchema } from "./fact.domain";
+import { DocumentSchema } from "./document.domain";
 
 export const sharedTables = {
-  operatorProfiles: defineTable(
-    withoutSystemFields(OperatorProfileSchema.fields)
-  ).index("by_name", ["name"]),
-
-  locations: defineTable(withoutSystemFields(LocationSchema.fields)).index(
-    "by_name",
-    ["name"]
+  documents: defineTable(withoutSystemFields(DocumentSchema.fields)).index(
+    "by_storageId",
+    ["storageId"]
   ),
 
-  jobs: defineTable(withoutSystemFields(JobSchema.fields)).index("by_name", [
-    "name",
+  chunks: defineTable(withoutSystemFields(ChunkSchema.fields)).index(
+    "by_document",
+    ["document"]
+  ),
+
+  facts: defineTable(withoutSystemFields(FactSchema.fields)).index("by_chunk", [
+    "chunk",
   ]),
 
   users: defineTable(withoutSystemFields(UserSchema.fields))

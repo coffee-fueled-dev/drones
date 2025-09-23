@@ -16,11 +16,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const { user } = await withAuth();
+  // const { user } = await withAuth();
 
-  if (user) {
-    return redirect(ROUTES.PROTECTED.WORKSPACE);
-  }
+  // if (user) {
+  //   return redirect(ROUTES.PROTECTED.WORKSPACE);
+  // }
 
   const signInUrl = await getSignInUrl();
   const signUpUrl = await getSignUpUrl();

@@ -8,20 +8,30 @@
  * @module
  */
 
-import type * as agent_agents_config from "../agent/agents/config.js";
-import type * as agent_agents_index from "../agent/agents/index.js";
-import type * as agent_agents_models from "../agent/agents/models.js";
-import type * as agent_agents_operator from "../agent/agents/operator.js";
-import type * as agent_internal_actions from "../agent/internal/actions.js";
-import type * as agent_internal_mutations from "../agent/internal/mutations.js";
-import type * as agent_internal_workflows from "../agent/internal/workflows.js";
-import type * as agent_libs_authorizeThreadAccess from "../agent/libs/authorizeThreadAccess.js";
-import type * as agent_public_mutations from "../agent/public/mutations.js";
-import type * as agent_public_queries from "../agent/public/queries.js";
+import type * as agent_config from "../agent/config.js";
+import type * as agent_libs from "../agent/libs.js";
+import type * as agent_models from "../agent/models.js";
+import type * as agent_operations_actions_thread from "../agent/operations/actions/thread.js";
+import type * as agent_operations_mutations_thread from "../agent/operations/mutations/thread.js";
+import type * as agent_operations_queries_thread from "../agent/operations/queries/thread.js";
+import type * as agent_operations_workflows_thread from "../agent/operations/workflows/thread.js";
+import type * as agent_operator from "../agent/operator.js";
 import type * as agent_tools_index from "../agent/tools/index.js";
 import type * as agent_tools_searchThreadMessages from "../agent/tools/searchThreadMessages.js";
 import type * as agent_tools_updateThreadTitle from "../agent/tools/updateThreadTitle.js";
+import type * as customFunctions from "../customFunctions.js";
 import type * as entities_tables from "../entities/tables.js";
+import type * as entities_triggers from "../entities/triggers.js";
+import type * as llm_extractFacts from "../llm/extractFacts.js";
+import type * as operations_actions_chunkProcessor from "../operations/actions/chunkProcessor.js";
+import type * as operations_actions_factExtractor from "../operations/actions/factExtractor.js";
+import type * as operations_mutations_chunks from "../operations/mutations/chunks.js";
+import type * as operations_mutations_document from "../operations/mutations/document.js";
+import type * as operations_mutations_facts from "../operations/mutations/facts.js";
+import type * as operations_queries_chunks from "../operations/queries/chunks.js";
+import type * as operations_queries_document from "../operations/queries/document.js";
+import type * as operations_workflows_chunkDocument from "../operations/workflows/chunkDocument.js";
+import type * as operations_workflows_extractDocumentFacts from "../operations/workflows/extractDocumentFacts.js";
 import type * as shared_repository from "../shared/repository.js";
 import type * as shared_systemFields from "../shared/systemFields.js";
 import type * as workflow from "../workflow.js";
@@ -41,20 +51,30 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "agent/agents/config": typeof agent_agents_config;
-  "agent/agents/index": typeof agent_agents_index;
-  "agent/agents/models": typeof agent_agents_models;
-  "agent/agents/operator": typeof agent_agents_operator;
-  "agent/internal/actions": typeof agent_internal_actions;
-  "agent/internal/mutations": typeof agent_internal_mutations;
-  "agent/internal/workflows": typeof agent_internal_workflows;
-  "agent/libs/authorizeThreadAccess": typeof agent_libs_authorizeThreadAccess;
-  "agent/public/mutations": typeof agent_public_mutations;
-  "agent/public/queries": typeof agent_public_queries;
+  "agent/config": typeof agent_config;
+  "agent/libs": typeof agent_libs;
+  "agent/models": typeof agent_models;
+  "agent/operations/actions/thread": typeof agent_operations_actions_thread;
+  "agent/operations/mutations/thread": typeof agent_operations_mutations_thread;
+  "agent/operations/queries/thread": typeof agent_operations_queries_thread;
+  "agent/operations/workflows/thread": typeof agent_operations_workflows_thread;
+  "agent/operator": typeof agent_operator;
   "agent/tools/index": typeof agent_tools_index;
   "agent/tools/searchThreadMessages": typeof agent_tools_searchThreadMessages;
   "agent/tools/updateThreadTitle": typeof agent_tools_updateThreadTitle;
+  customFunctions: typeof customFunctions;
   "entities/tables": typeof entities_tables;
+  "entities/triggers": typeof entities_triggers;
+  "llm/extractFacts": typeof llm_extractFacts;
+  "operations/actions/chunkProcessor": typeof operations_actions_chunkProcessor;
+  "operations/actions/factExtractor": typeof operations_actions_factExtractor;
+  "operations/mutations/chunks": typeof operations_mutations_chunks;
+  "operations/mutations/document": typeof operations_mutations_document;
+  "operations/mutations/facts": typeof operations_mutations_facts;
+  "operations/queries/chunks": typeof operations_queries_chunks;
+  "operations/queries/document": typeof operations_queries_document;
+  "operations/workflows/chunkDocument": typeof operations_workflows_chunkDocument;
+  "operations/workflows/extractDocumentFacts": typeof operations_workflows_extractDocumentFacts;
   "shared/repository": typeof shared_repository;
   "shared/systemFields": typeof shared_systemFields;
   workflow: typeof workflow;

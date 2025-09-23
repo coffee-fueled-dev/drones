@@ -2,7 +2,7 @@ import { createTool, fetchContextMessages } from "@convex-dev/agent";
 import z from "zod";
 import { components } from "../../_generated/api";
 import { embed } from "ai";
-import { textEmbedding } from "../agents/models";
+import { textEmbedding } from "../models";
 
 export const searchThreadMessages = createTool({
   description: "Search for messages in the thread",
