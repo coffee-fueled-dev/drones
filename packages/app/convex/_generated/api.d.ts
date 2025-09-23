@@ -8,33 +8,25 @@
  * @module
  */
 
-import type * as agent_config from "../agent/config.js";
-import type * as agent_libs from "../agent/libs.js";
-import type * as agent_models from "../agent/models.js";
-import type * as agent_operations_actions_thread from "../agent/operations/actions/thread.js";
-import type * as agent_operations_mutations_thread from "../agent/operations/mutations/thread.js";
-import type * as agent_operations_queries_thread from "../agent/operations/queries/thread.js";
-import type * as agent_operations_workflows_thread from "../agent/operations/workflows/thread.js";
-import type * as agent_operator from "../agent/operator.js";
-import type * as agent_tools_index from "../agent/tools/index.js";
-import type * as agent_tools_searchThreadMessages from "../agent/tools/searchThreadMessages.js";
-import type * as agent_tools_updateThreadTitle from "../agent/tools/updateThreadTitle.js";
 import type * as customFunctions from "../customFunctions.js";
-import type * as entities_tables from "../entities/tables.js";
-import type * as entities_triggers from "../entities/triggers.js";
-import type * as llm_extractFacts from "../llm/extractFacts.js";
-import type * as operations_actions_chunkProcessor from "../operations/actions/chunkProcessor.js";
-import type * as operations_actions_factExtractor from "../operations/actions/factExtractor.js";
-import type * as operations_mutations_chunks from "../operations/mutations/chunks.js";
-import type * as operations_mutations_document from "../operations/mutations/document.js";
-import type * as operations_mutations_facts from "../operations/mutations/facts.js";
-import type * as operations_queries_chunks from "../operations/queries/chunks.js";
-import type * as operations_queries_document from "../operations/queries/document.js";
-import type * as operations_workflows_chunkDocument from "../operations/workflows/chunkDocument.js";
-import type * as operations_workflows_extractDocumentFacts from "../operations/workflows/extractDocumentFacts.js";
+import type * as knowledgeGraph_operations_source_actions from "../knowledgeGraph/operations/source/actions.js";
+import type * as knowledgeGraph_operations_source_chunk_actions from "../knowledgeGraph/operations/source/chunk/actions.js";
+import type * as knowledgeGraph_operations_source_chunk_fact_mutations from "../knowledgeGraph/operations/source/chunk/fact/mutations.js";
+import type * as knowledgeGraph_operations_source_chunk_libs_extractFacts from "../knowledgeGraph/operations/source/chunk/libs/extractFacts.js";
+import type * as knowledgeGraph_operations_source_chunk_mutations from "../knowledgeGraph/operations/source/chunk/mutations.js";
+import type * as knowledgeGraph_operations_source_chunk_queries from "../knowledgeGraph/operations/source/chunk/queries.js";
+import type * as knowledgeGraph_operations_source_mutations from "../knowledgeGraph/operations/source/mutations.js";
+import type * as knowledgeGraph_operations_source_queries from "../knowledgeGraph/operations/source/queries.js";
+import type * as knowledgeGraph_operations_workflows_chunkSource from "../knowledgeGraph/operations/workflows/chunkSource.js";
+import type * as knowledgeGraph_operations_workflows_extractSourceFacts from "../knowledgeGraph/operations/workflows/extractSourceFacts.js";
+import type * as knowledgeGraph_tables from "../knowledgeGraph/tables.js";
+import type * as knowledgeGraph_triggers from "../knowledgeGraph/triggers.js";
 import type * as shared_repository from "../shared/repository.js";
 import type * as shared_systemFields from "../shared/systemFields.js";
 import type * as workflow from "../workflow.js";
+import type * as workspace_entities_company from "../workspace/entities/company.js";
+import type * as workspace_tables from "../workspace/tables.js";
+import type * as workspace_triggers from "../workspace/triggers.js";
 
 import type {
   ApiFromModules,
@@ -51,33 +43,25 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "agent/config": typeof agent_config;
-  "agent/libs": typeof agent_libs;
-  "agent/models": typeof agent_models;
-  "agent/operations/actions/thread": typeof agent_operations_actions_thread;
-  "agent/operations/mutations/thread": typeof agent_operations_mutations_thread;
-  "agent/operations/queries/thread": typeof agent_operations_queries_thread;
-  "agent/operations/workflows/thread": typeof agent_operations_workflows_thread;
-  "agent/operator": typeof agent_operator;
-  "agent/tools/index": typeof agent_tools_index;
-  "agent/tools/searchThreadMessages": typeof agent_tools_searchThreadMessages;
-  "agent/tools/updateThreadTitle": typeof agent_tools_updateThreadTitle;
   customFunctions: typeof customFunctions;
-  "entities/tables": typeof entities_tables;
-  "entities/triggers": typeof entities_triggers;
-  "llm/extractFacts": typeof llm_extractFacts;
-  "operations/actions/chunkProcessor": typeof operations_actions_chunkProcessor;
-  "operations/actions/factExtractor": typeof operations_actions_factExtractor;
-  "operations/mutations/chunks": typeof operations_mutations_chunks;
-  "operations/mutations/document": typeof operations_mutations_document;
-  "operations/mutations/facts": typeof operations_mutations_facts;
-  "operations/queries/chunks": typeof operations_queries_chunks;
-  "operations/queries/document": typeof operations_queries_document;
-  "operations/workflows/chunkDocument": typeof operations_workflows_chunkDocument;
-  "operations/workflows/extractDocumentFacts": typeof operations_workflows_extractDocumentFacts;
+  "knowledgeGraph/operations/source/actions": typeof knowledgeGraph_operations_source_actions;
+  "knowledgeGraph/operations/source/chunk/actions": typeof knowledgeGraph_operations_source_chunk_actions;
+  "knowledgeGraph/operations/source/chunk/fact/mutations": typeof knowledgeGraph_operations_source_chunk_fact_mutations;
+  "knowledgeGraph/operations/source/chunk/libs/extractFacts": typeof knowledgeGraph_operations_source_chunk_libs_extractFacts;
+  "knowledgeGraph/operations/source/chunk/mutations": typeof knowledgeGraph_operations_source_chunk_mutations;
+  "knowledgeGraph/operations/source/chunk/queries": typeof knowledgeGraph_operations_source_chunk_queries;
+  "knowledgeGraph/operations/source/mutations": typeof knowledgeGraph_operations_source_mutations;
+  "knowledgeGraph/operations/source/queries": typeof knowledgeGraph_operations_source_queries;
+  "knowledgeGraph/operations/workflows/chunkSource": typeof knowledgeGraph_operations_workflows_chunkSource;
+  "knowledgeGraph/operations/workflows/extractSourceFacts": typeof knowledgeGraph_operations_workflows_extractSourceFacts;
+  "knowledgeGraph/tables": typeof knowledgeGraph_tables;
+  "knowledgeGraph/triggers": typeof knowledgeGraph_triggers;
   "shared/repository": typeof shared_repository;
   "shared/systemFields": typeof shared_systemFields;
   workflow: typeof workflow;
+  "workspace/entities/company": typeof workspace_entities_company;
+  "workspace/tables": typeof workspace_tables;
+  "workspace/triggers": typeof workspace_triggers;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

@@ -19,7 +19,7 @@ import {
 // Register Triggers.
 const triggers = new Triggers<DataModel>();
 // enable children files to register triggers receiving the triggers instance
-import { registerTriggers } from "./entities/triggers";
+import { registerTriggers } from "./knowledgeGraph/triggers";
 registerTriggers(triggers);
 
 // Create custom functions that include triggers and other middleware

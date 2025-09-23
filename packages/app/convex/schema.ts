@@ -1,4 +1,8 @@
 import { defineSchema } from "convex/server";
-import { sharedTables } from "./entities/tables";
+import { knowledgeGraphTables } from "./knowledgeGraph/tables";
+import { userManagementTables } from "./workspace/tables";
 
-export default defineSchema(sharedTables);
+export default defineSchema({
+  ...knowledgeGraphTables,
+  ...userManagementTables,
+});
