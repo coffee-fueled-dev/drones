@@ -16,7 +16,7 @@ import {
 import { FolderClock, Plus } from "lucide-react";
 import { useChat } from "./chat-provider";
 import { useQuery } from "convex/react";
-import { api } from "@drone/convex";
+import { api } from "../../../convex/_generated/api";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

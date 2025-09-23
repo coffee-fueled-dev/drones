@@ -3,7 +3,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./common";
+} from "./ui/tooltip";
 import { FC, ReactNode } from "react";
 import { TooltipContentProps, TooltipProps } from "@radix-ui/react-tooltip";
 

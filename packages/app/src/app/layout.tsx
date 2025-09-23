@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ConvexClientProvider } from "@/components/convex-client-provider";
-import { AuthKitProvider } from "@workos-inc/authkit-react";
-import { env } from "@/lib/env";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,12 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthKitProvider
-          clientId={env.NEXT_PUBLIC_WORKOS_CLIENT_ID}
-          redirectUri={env.NEXT_PUBLIC_WORKOS_REDIRECT_URI}
-        >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </AuthKitProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

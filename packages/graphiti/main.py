@@ -42,8 +42,8 @@ NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Set low concurrency to avoid OpenAI rate limits (default is 10, lower for safety)
-SEMAPHORE_LIMIT = os.getenv("SEMAPHORE_LIMIT", "3")
+# Set very low concurrency to avoid OpenAI rate limits (default is 10, much lower for safety)
+SEMAPHORE_LIMIT = os.getenv("SEMAPHORE_LIMIT", "1")
 os.environ["SEMAPHORE_LIMIT"] = SEMAPHORE_LIMIT
 
 if not (NEO4J_URI and NEO4J_USER and NEO4J_PASSWORD):

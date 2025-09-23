@@ -5,17 +5,20 @@ import { GraphRunner, type GraphRunnerConfig } from "./graph-writer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DOCS_DIR = path.resolve(__dirname, "docs");
+const DOCS_DIR = path.resolve(__dirname, "..", "docs");
 
 // Configuration from environment variables
 const config: Omit<GraphRunnerConfig, "chunksPath" | "metadataPath"> = {
   graphitiUrl: process.env.GRAPHITI_URL || "http://localhost:8000",
-  delayBetweenChunks: parseInt(process.env.DELAY_BETWEEN_CHUNKS || "2000", 10), // Increased to 2s to avoid rate limits
+  delayBetweenChunks: parseInt(process.env.DELAY_BETWEEN_CHUNKS || "5000", 10), // Increased to 5s to avoid rate limits
   concurrency: 1, // Keep sequential to avoid overwhelming Graphiti
   enabled: process.env.ENABLE_GRAPHITI !== "false", // Default to enabled
   maxRetries: parseInt(process.env.MAX_RETRIES || "3", 10),
   batchSize: parseInt(process.env.BATCH_SIZE || "10", 10),
 };
+
+// Check for resume argument
+const resumeFromChunkId = process.argv[2];
 
 console.log(`🚀 Starting Graphiti fact writing process`);
 console.log(`📁 Scanning directory: ${DOCS_DIR}`);
@@ -23,6 +26,10 @@ console.log(`🌐 Graphiti URL: ${config.graphitiUrl}`);
 console.log(`⏱️  Delay between chunks: ${config.delayBetweenChunks}ms`);
 console.log(`🔧 Enabled: ${config.enabled}`);
 console.log(`🔄 Max retries: ${config.maxRetries}`);
+
+if (resumeFromChunkId) {
+  console.log(`🔄 Resuming from chunk ID: ${resumeFromChunkId}`);
+}
 
 // Find all processed document directories (those containing chunks.jsonl)
 const processedDirs: string[] = [];
@@ -81,8 +88,10 @@ for (const dirPath of processedDirs) {
       continue;
     }
 
-    // Process the document
-    const result = await runner.run();
+    // Process the document (resume from specific chunk if provided)
+    const result = resumeFromChunkId
+      ? await runner.runFrom(resumeFromChunkId)
+      : await runner.run();
 
     console.log(`   ✅ Completed ${dirName}:`);
     console.log(`      Chunks processed: ${result.chunksProcessed}`);

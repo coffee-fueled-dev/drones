@@ -144,16 +144,41 @@ export class GraphRunner extends GraphWriter {
         // Add chunk processing job to queue
         this.queue.push(async () => {
           try {
-            const episode = await this.createEpisodeFromChunk(chunk);
+            // Create multiple episodes for this chunk (one per fact)
+            const episodes = await this.createEpisodesFromChunk(chunk);
 
-            // Send episode to Graphiti (blocking - wait for response)
-            await this.client.sendEpisode(episode);
+            console.log(
+              `[GraphRunner] Processing chunk ${chunk.chunkId} with ${episodes.length} fact(s)`
+            );
 
-            result.episodesSent++;
+            // Send each episode individually with delay
+            for (let i = 0; i < episodes.length; i++) {
+              const episode = episodes[i];
+
+              try {
+                // Send episode to Graphiti (blocking - wait for response)
+                await this.client.sendEpisode(episode);
+                result.episodesSent++;
+
+                console.log(
+                  `[GraphRunner] Sent fact ${i + 1}/${episodes.length} for chunk ${chunk.chunkId}`
+                );
+
+                // Add delay between individual facts to be very conservative
+                if (i < episodes.length - 1) {
+                  await this.sleepMs(1000); // 1 second between facts
+                }
+              } catch (error) {
+                const errorMsg = `Failed to send fact ${i + 1}/${episodes.length} for chunk ${chunk.chunkId}: ${error}`;
+                console.error(`[GraphRunner] ${errorMsg}`);
+                result.errors.push(errorMsg);
+              }
+            }
+
             result.chunksProcessed++;
 
             console.log(
-              `[GraphRunner] Processed chunk ${chunk.chunkId} (${result.chunksProcessed}/${this.getTotalChunks()})`
+              `[GraphRunner] Completed chunk ${chunk.chunkId} (${result.chunksProcessed}/${this.getTotalChunks()})`
             );
 
             // Add delay between chunks to avoid overwhelming the server

@@ -146,7 +146,111 @@ export class GraphWriter {
   }
 
   /**
-   * Create a Graphiti episode from a chunk
+   * Create multiple Graphiti episodes from a chunk (one per fact)
+   */
+  protected async createEpisodesFromChunk(
+    chunk: Chunk
+  ): Promise<GraphitiEpisode[]> {
+    // Decode the compressed data with proper typing
+    const extraction = Encoder.decode<FactResponse>(chunk.hashes.extraction);
+    const processMetadata = Encoder.decode<ProcessMetadata>(
+      chunk.hashes.processMetadata
+    );
+
+    // Get document info from metadata
+    const documentName =
+      processMetadata.filename ||
+      this.processMetadata?.filename ||
+      "Unknown Document";
+    const documentDescription =
+      processMetadata.description ||
+      this.processMetadata?.description ||
+      `Document processing for ${processMetadata.filename || this.processMetadata?.filename || "unknown file"}`;
+
+    const episodes: GraphitiEpisode[] = [];
+    const facts = extraction.facts || [];
+    const globalContext = extraction.globalContext || [];
+    const currentContext = extraction.currentContext || [];
+
+    // Create one episode per fact
+    for (let i = 0; i < facts.length; i++) {
+      const fact = facts[i];
+      const episodeName = `${documentName}_chunk_${chunk.chunkId}_fact_${i + 1}`;
+
+      // Create focused episode content for this single fact
+      const episodeContent = {
+        fact: {
+          subject: fact.subject,
+          predicate: fact.predicate,
+          object: fact.object,
+        },
+        context: {
+          document: {
+            name: documentName,
+            description: documentDescription,
+          },
+          chunk: {
+            id: chunk.chunkId,
+            position: chunk.cursorPosition,
+            size: chunk.chunkSize,
+            processedAt: new Date(chunk.tsStart).toISOString(),
+          },
+          globalContext: globalContext,
+          currentContext: currentContext,
+        },
+        metadata: {
+          factIndex: i + 1,
+          totalFacts: facts.length,
+          extractionSource: "document_processor",
+        },
+      };
+
+      const episode = this.client.createEpisode(
+        episodeContent,
+        episodeName,
+        `Fact ${i + 1}/${facts.length} from ${documentName} chunk ${chunk.chunkId}: ${fact.subject} ${fact.predicate} ${fact.object}`,
+        new Date(chunk.tsStart).toISOString()
+      );
+
+      episodes.push(episode);
+    }
+
+    // If no facts, create a single episode indicating no facts found
+    if (facts.length === 0) {
+      const episodeName = `${documentName}_chunk_${chunk.chunkId}_no_facts`;
+      const episodeContent = {
+        chunk: {
+          id: chunk.chunkId,
+          position: chunk.cursorPosition,
+          size: chunk.chunkSize,
+          processedAt: new Date(chunk.tsStart).toISOString(),
+          factsFound: 0,
+        },
+        context: {
+          document: {
+            name: documentName,
+            description: documentDescription,
+          },
+          globalContext: globalContext,
+          currentContext: currentContext,
+        },
+      };
+
+      const episode = this.client.createEpisode(
+        episodeContent,
+        episodeName,
+        `No facts extracted from ${documentName} chunk ${chunk.chunkId}`,
+        new Date(chunk.tsStart).toISOString()
+      );
+
+      episodes.push(episode);
+    }
+
+    return episodes;
+  }
+
+  /**
+   * Create a Graphiti episode from a chunk (legacy method - kept for compatibility)
    */
   protected async createEpisodeFromChunk(
     chunk: Chunk

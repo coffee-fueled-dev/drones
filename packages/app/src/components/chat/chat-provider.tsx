@@ -1,6 +1,6 @@
 "use client";
 
-import { api } from "@drone/convex";
+import { api } from "../../../convex/_generated/api";
 import { useMutation } from "convex/react";
 import { type FunctionReference } from "convex/server";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
@@ -19,31 +19,16 @@ import {
 import { GenericId as Id } from "convex/values";
 import { serializeForLLM } from "./util/serialize-for-llm";
 
-// Extract the scheduleMessage parameters and pick only the optional ones for sendMessage
-type ScheduleMessageArgs =
-  typeof api.agent.public.mutations.scheduleMessage extends FunctionReference<
-    "mutation",
-    "public",
-    infer Args,
-    any
-  >
-    ? Args
-    : never;
-export type SendMessageOptions = Pick<ScheduleMessageArgs, "toolConfig"> & {
+export type SendMessageOptions = {
   context?: string | Record<string, unknown>;
 };
 
 interface ChatContextValue {
   chatContext?: string | Record<string, unknown>;
-  profile:
-    | {
-        id: Id<"hardwareBrandProfiles">;
-        type: "hardware-brand";
-      }
-    | {
-        id: Id<"servicePartnerProfiles">;
-        type: "service-partner";
-      };
+  profile: {
+    id: Id<"operatorProfiles">;
+    type: "operator";
+  };
   threadId: string | null;
   isLoading: boolean;
   prompt: string;
@@ -60,16 +45,10 @@ const ChatContext = createContext<ChatContextValue | undefined>(undefined);
 
 interface ChatProviderProps {
   chatContext?: string | Record<string, unknown>;
-  profile:
-    | {
-        id: Id<"hardwareBrandProfiles">;
-        type: "hardware-brand";
-      }
-    | {
-        id: Id<"servicePartnerProfiles">;
-        type: "service-partner";
-      };
-  toolConfig: SendMessageOptions["toolConfig"];
+  profile: {
+    id: Id<"operatorProfiles">;
+    type: "operator";
+  };
   children: ReactNode;
 }
 
@@ -77,7 +56,6 @@ export function ChatProvider({
   profile,
   children,
   chatContext,
-  toolConfig,
 }: ChatProviderProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -131,22 +109,19 @@ export function ChatProvider({
     async (initialMessage?: string, options?: SendMessageOptions) => {
       if (!user?.id) return;
 
-      const collectedToolConfig = {
-        ...toolConfig,
-        ...options?.toolConfig,
-      } as SendMessageOptions["toolConfig"];
-
       setIsLoading(true);
       try {
         const newThread = await createThread({
           profile,
           user: {
-            externalId: user.id,
+            name:
+              `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+              user.email,
+            description: `User account for ${user.email}`,
             email: user.email,
-            firstName: user.firstName ?? "",
-            lastName: user.lastName ?? "",
+            workosUserId: user.id,
+            role: "operator" as const,
           },
-          toolConfig: collectedToolConfig,
           initialMessage: initialMessage
             ? {
                 prompt: initialMessage,
@@ -177,17 +152,9 @@ export function ChatProvider({
       const promptToSend = messagePrompt ?? prompt;
       if (promptToSend.trim() === "" || !workosUserId) return;
 
-      const collectedToolConfig = {
-        ...toolConfig,
-        ...options?.toolConfig,
-      } as SendMessageOptions["toolConfig"];
-
       // If no thread exists, create one first
       if (!threadId) {
-        await createNewThread(promptToSend, {
-          ...options,
-          toolConfig: collectedToolConfig,
-        });
+        await createNewThread(promptToSend, options);
         setPrompt("");
         return;
       }
@@ -195,20 +162,12 @@ export function ChatProvider({
       void scheduleMessageMutation({
         threadId,
         workosUserId,
-        toolConfig: collectedToolConfig,
         prompt: promptToSend,
         context: getCombinedContext([chatContext, options?.context]),
       }).catch(() => setPrompt(promptToSend));
       setPrompt("");
     },
-    [
-      prompt,
-      threadId,
-      workosUserId,
-      scheduleMessageMutation,
-      toolConfig,
-      createNewThread,
-    ]
+    [prompt, threadId, workosUserId, scheduleMessageMutation, createNewThread]
   );
 
   // Abort current stream

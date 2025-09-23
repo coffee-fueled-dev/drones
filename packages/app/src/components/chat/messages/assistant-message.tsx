@@ -18,8 +18,16 @@ export const AssistantMessage = ({ message }: { message: UIMessage }) => {
               );
 
             case "tool-invocation":
-              console.log(part);
-              return "ToolInvocationPart";
+              return (
+                <ToolInvocationPart
+                  key={index}
+                  args={part.toolInvocation.args}
+                  toolName={part.toolInvocation.toolName}
+                  result={part.toolInvocation.result || ""}
+                  state={part.toolInvocation.state}
+                  toolCallId={part.toolInvocation.toolCallId}
+                />
+              );
 
             default:
               return null;
