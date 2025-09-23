@@ -1,7 +1,11 @@
 import path from "path";
 import fs from "node:fs";
-import type { Fact } from "../agents/fact-extractor";
-import type { DocumentMetadata, ProcessingPaths, ResumeInfo } from "./types";
+import type {
+  ProcessMetadata,
+  ProcessingPaths,
+  ResumeInfo,
+  Chunk,
+} from "./types";
 
 /** Pure functions for file system operations */
 
@@ -13,9 +17,8 @@ export function createProcessingPaths(file: Bun.BunFile): ProcessingPaths {
 
   return {
     outputDir,
-    factsPath: path.join(outputDir, "facts.jsonl"),
-    globalContextPath: path.join(outputDir, "global_context.jsonl"),
     metadataPath: path.join(outputDir, "metadata.json"),
+    chunksPath: path.join(outputDir, "chunks.jsonl"),
   };
 }
 
@@ -27,7 +30,7 @@ export async function getResumeInfo(file: Bun.BunFile): Promise<ResumeInfo> {
 
   // Get existing global context
   const existingGlobalContext = await getExistingGlobalContext(
-    paths.globalContextPath
+    paths.chunksPath
   );
 
   return { position, existingGlobalContext };
@@ -38,7 +41,7 @@ export async function getResumePosition(metadataPath: string): Promise<number> {
     const metadataFile = Bun.file(metadataPath);
     if (await metadataFile.exists()) {
       const metadata = await metadataFile.json();
-      return metadata.characterPosition || 0;
+      return metadata.cursorPosition || 0;
     }
   } catch (error) {
     console.warn("Could not load existing metadata for resume:", error);
@@ -47,30 +50,40 @@ export async function getResumePosition(metadataPath: string): Promise<number> {
 }
 
 export async function getExistingGlobalContext(
-  globalContextPath: string
+  chunksPath: string
 ): Promise<string[]> {
   try {
-    const globalContextFile = Bun.file(globalContextPath);
-    if (await globalContextFile.exists()) {
-      const content = await globalContextFile.text();
+    const chunksFile = Bun.file(chunksPath);
+    if (await chunksFile.exists()) {
+      const content = await chunksFile.text();
       if (!content.trim()) return [];
 
-      // Parse all entries and extract just the content, keeping only last 5
-      const entries = content
+      // Parse all chunks and extract global context from the last few chunks
+      const chunks = content
         .trim()
         .split("\n")
         .filter((line) => line.trim())
         .map((line) => {
           try {
-            return JSON.parse(line).content;
+            return JSON.parse(line);
           } catch {
             return null;
           }
         })
-        .filter((content): content is string => content !== null);
+        .filter((chunk): chunk is Chunk => chunk !== null);
 
-      // Return only the last 5 entries
-      return entries.slice(-5);
+      // Get last 5 global context entries from recent chunks
+      const recentChunks = chunks.slice(-10); // Look at last 10 chunks
+      const globalContext: string[] = [];
+
+      for (const chunk of recentChunks) {
+        if (chunk.context?.lastFiveGlobal) {
+          globalContext.push(...chunk.context.lastFiveGlobal);
+        }
+      }
+
+      // Return only the last 5 unique entries
+      return [...new Set(globalContext)].slice(-5);
     }
   } catch (error) {
     console.warn("Could not load existing global context for resume:", error);
@@ -88,70 +101,37 @@ export async function initializeOutputDirectory(
 }
 
 export async function clearOutputFiles(paths: ProcessingPaths): Promise<void> {
-  await Bun.write(paths.factsPath, "");
-  await Bun.write(paths.globalContextPath, "");
+  await Bun.write(paths.chunksPath, "");
   console.log(`🆕 Starting fresh extraction`);
 }
 
 export async function saveMetadata(
   metadataPath: string,
-  metadata: DocumentMetadata
+  metadata: ProcessMetadata
 ): Promise<void> {
   await Bun.write(metadataPath, JSON.stringify(metadata, null, 2));
 }
 
-export async function appendFacts(
-  factsPath: string,
-  facts: Fact[],
-  currentContext: string[],
-  chunkIndex: number,
-  characterPosition: number
+export async function appendChunk(
+  chunksPath: string,
+  chunk: Chunk
 ): Promise<void> {
-  if (facts.length === 0) return;
-
   const timestamp = new Date().toISOString();
-  const jsonlLines =
-    facts
-      .map((fact) =>
-        JSON.stringify({
-          ...fact,
-          currentContext,
-          timestamp,
-          chunkIndex,
-          characterPosition,
-        })
-      )
-      .join("\n") + "\n";
+  const chunkWithTimestamp = {
+    ...chunk,
+    timestamp,
+  };
 
-  const file = Bun.file(factsPath);
-  const existingContent = await file.text();
-  await Bun.write(factsPath, existingContent + jsonlLines);
-}
+  const jsonlLine = JSON.stringify(chunkWithTimestamp) + "\n";
 
-export async function appendGlobalContext(
-  globalContextPath: string,
-  contextEntries: string[],
-  chunkIndex: number,
-  characterPosition: number
-): Promise<void> {
-  if (contextEntries.length === 0) return;
+  const file = Bun.file(chunksPath);
+  let existingContent = "";
 
-  const timestamp = new Date().toISOString();
-  const jsonlLines =
-    contextEntries
-      .map((entry) =>
-        JSON.stringify({
-          content: entry,
-          timestamp,
-          chunkIndex,
-          characterPosition,
-        })
-      )
-      .join("\n") + "\n";
+  if (await file.exists()) {
+    existingContent = await file.text();
+  }
 
-  const file = Bun.file(globalContextPath);
-  const existingContent = await file.text();
-  await Bun.write(globalContextPath, existingContent + jsonlLines);
+  await Bun.write(chunksPath, existingContent + jsonlLine);
 }
 
 export async function getFileLineCount(filePath: string): Promise<number> {
@@ -165,29 +145,5 @@ export async function getFileLineCount(filePath: string): Promise<number> {
       .filter((line) => line.trim()).length;
   } catch (error) {
     return 0;
-  }
-}
-
-export async function estimateChunkCount(
-  file: Bun.BunFile,
-  chunkSizeThreshold: number
-): Promise<number> {
-  try {
-    const fileSize = file.size;
-    if (!fileSize) {
-      // If we can't get file size, try reading the content
-      const content = await file.text();
-      const contentLength = content.length;
-      const estimatedChunks = Math.ceil(contentLength / chunkSizeThreshold);
-      return Math.max(1, estimatedChunks);
-    }
-
-    // Rough estimation: file size in bytes ≈ characters for text files
-    // Add some buffer since chunking considers paragraph boundaries
-    const estimatedChunks = Math.ceil((fileSize * 1.2) / chunkSizeThreshold);
-    return Math.max(1, estimatedChunks);
-  } catch (error) {
-    console.warn(`Could not estimate chunk count: ${error}`);
-    return 1;
   }
 }

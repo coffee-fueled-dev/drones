@@ -123,7 +123,8 @@ async def add_episode(req: Request):
     else:
         epi_type = EpisodeType.json
         try:
-            epi_body = json.dumps(content)
+            # Just serialize any JSON content
+            epi_body = json.dumps(content, indent=2)
         except Exception:
             raise HTTPException(status_code=400, detail="'content' must be string or JSON-serializable")
 

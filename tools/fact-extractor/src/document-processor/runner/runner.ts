@@ -1,4 +1,4 @@
-import { FactExtractionAgent } from "../agents/fact-extractor";
+import { FactExtractionAgent } from "../../agents/fact-extractor";
 import { DocumentProcessor } from "../document-processor";
 import { streamFileChunks } from "./streaming";
 import type { RunnerConfig, ProcessingResult } from "./types";
@@ -29,9 +29,9 @@ export class Runner {
       factAgent,
       file,
       this.config.chunkSizeThreshold,
-      this.config.enableGraphiti,
       resumePosition,
-      existingGlobalContext
+      existingGlobalContext,
+      this.config.description || ""
     );
 
     await processor.start();
@@ -47,7 +47,7 @@ export class Runner {
     const result = await processor.finalize();
 
     console.log(`\n=== Completed ${filename} ===`);
-    console.log(`Output written to: ${result.factsPath}`);
+    console.log(`Output written to: ${result.chunksPath}`);
     console.log(`Metadata written to: ${result.metadataPath}`);
     console.log(
       `Final stats: ${chunksProcessed} chunks processed, ${result.context.length} context items`
@@ -57,7 +57,7 @@ export class Runner {
       filename,
       chunksProcessed,
       contextItems: result.context.length,
-      factsPath: result.factsPath,
+      chunksPath: result.chunksPath,
       metadataPath: result.metadataPath,
       outputDir: result.outputDir,
     };

@@ -2,16 +2,26 @@ import type { Fact } from "../agents/fact-extractor";
 
 /** Core domain model for document processing */
 export interface ProcessingState {
-  chunkCounter: number;
-  characterPosition: number;
-  estimatedChunks: number;
-  lastFiveGlobalContext: string[];
-  fileSize?: number;
+  chunkId: string; // UUID
+  cursorPosition: number;
+  context: {
+    current: string[];
+    lastFiveGlobal: string[];
+  };
+  chunkSize: number;
+  tsStart: number;
+  tsEnd: number;
+}
+
+export interface Chunk extends ProcessingState {
+  hashes: {
+    extraction: string; // Compressed Extraction response
+    processMetadata: string; // Compressed ProcessMetadata
+  };
 }
 
 export interface ProcessingConfig {
   chunkSizeThreshold: number;
-  enableGraphiti: boolean;
   resumeFromPosition: number;
   existingGlobalContext: string[];
   extractionTimeoutMs: number;
@@ -19,25 +29,20 @@ export interface ProcessingConfig {
 
 export interface ProcessingPaths {
   outputDir: string;
-  factsPath: string;
-  globalContextPath: string;
   metadataPath: string;
+  chunksPath: string;
 }
 
-export interface DocumentMetadata {
+export interface ProcessMetadata {
+  processId: string; // UUID
   filename: string;
   filepath: string;
+  description?: string;
   processedAt: string;
   lastUpdated: string;
   chunkSizeThreshold: number;
-  currentContext: string[];
-  totalChunks: number;
-  estimatedChunks: number;
-  characterPosition: number;
-  factsFile: string;
-  globalContextFile: string;
+  fileSize?: number;
   status: "processing" | "completed";
-  lastChunkProcessedAt: string;
   completedAt?: string;
 }
 

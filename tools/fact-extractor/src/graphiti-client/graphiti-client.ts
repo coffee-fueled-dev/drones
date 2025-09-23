@@ -1,16 +1,5 @@
-import type { Fact } from "../agents";
-
-export interface GraphitiEpisode {
-  content: {
-    facts: Fact[];
-    metadata: {
-      filename: string;
-      filepath: string;
-      chunkIndex?: number;
-      globalContext?: string[];
-      currentContext?: string[];
-    };
-  };
+export interface GraphitiEpisode<T extends unknown = unknown> {
+  content: T;
   name?: string;
   description?: string;
   reference_time?: string;
@@ -174,42 +163,44 @@ export class GraphitiClient {
       const response = await fetch(`${this.baseUrl}/`, {
         method: "GET",
         headers: { Accept: "application/json" },
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(5000), // 5 second timeout
       });
+
       // Server is available if it responds (even with 404 for root path)
       // We're just checking if the server is reachable
-      return response.status >= 200 && response.status < 500;
-    } catch {
+      const isAvailable = response.status >= 200 && response.status < 500;
+
+      if (!isAvailable) {
+        console.warn(
+          `[GraphitiClient] Server responded with status ${response.status}`
+        );
+      }
+
+      return isAvailable;
+    } catch (error) {
+      console.warn(
+        `[GraphitiClient] Server availability check failed:`,
+        error instanceof Error ? error.message : error
+      );
       return false;
     }
   }
 
   /**
-   * Create an episode from fact extraction results
+   * Create a Graphiti episode
    */
-  createFactsEpisode(
-    facts: Fact[],
-    metadata: {
-      filename: string;
-      filepath: string;
-      chunkIndex?: number;
-      globalContext?: string[];
-      currentContext?: string[];
-    }
+  createEpisode<T extends unknown = unknown>(
+    content: T,
+    name?: string,
+    description?: string,
+    referenceTime?: string
   ): GraphitiEpisode {
-    const episodeName = metadata.chunkIndex
-      ? `${metadata.filename}_chunk_${metadata.chunkIndex}`
-      : metadata.filename;
-
     return {
-      content: {
-        facts,
-        metadata,
-      },
-      name: episodeName,
-      description: `Facts extracted from ${metadata.filename}${
-        metadata.chunkIndex ? ` (chunk ${metadata.chunkIndex})` : ""
-      }`,
-      reference_time: new Date().toISOString(),
+      content,
+      name: name || `episode_${new Date().toISOString()}`,
+      description: description || "Generated episode",
+      reference_time: referenceTime || new Date().toISOString(),
     };
   }
 }

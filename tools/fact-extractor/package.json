@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "all": "bun run src/index.ts",
-    "start": "bun run src/index.ts",
-    "auto-resume": "bun run auto-resume.ts"
+    "extract-facts": "bun run src/extract-facts.ts",
+    "write-facts": "bun run src/write-facts.ts"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/json-to-pretty-yaml": "^1.2.1"
+  },
   "peerDependencies": {},
   "dependencies": {
+    "json-to-pretty-yaml": "^1.2.2",
     "openai": "^5.22.0",
     "queue": "^7.0.0",
     "zod": "^3.25.0"

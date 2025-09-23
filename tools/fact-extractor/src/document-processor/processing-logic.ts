@@ -1,21 +1,32 @@
-import type { Fact, FactExtractionAgent } from "../agents/fact-extractor";
+import type { FactExtractionAgent } from "../agents/fact-extractor";
 import type {
   ProcessingState,
   ChunkProcessingResult,
-  DocumentMetadata,
   ProcessingProgress,
   ProcessingConfig,
-  ProcessingPaths,
+  Chunk,
+  ProcessMetadata,
 } from "./types";
+import { Encoder } from "../encoder";
 
 /** Pure functions for processing logic */
 
 export function createInitialState(config: ProcessingConfig): ProcessingState {
+  // Ensure existingGlobalContext is always an array
+  const existingContext = Array.isArray(config?.existingGlobalContext)
+    ? config.existingGlobalContext
+    : [];
+
   return {
-    chunkCounter: 0,
-    characterPosition: config.resumeFromPosition,
-    estimatedChunks: 0,
-    lastFiveGlobalContext: [...config.existingGlobalContext],
+    chunkId: Bun.randomUUIDv7(),
+    cursorPosition: config.resumeFromPosition,
+    context: {
+      current: [],
+      lastFiveGlobal: [...existingContext],
+    },
+    chunkSize: 0,
+    tsStart: Date.now(),
+    tsEnd: 0,
   };
 }
 
@@ -24,16 +35,18 @@ export function updateStateForChunk(
   chunkStartPosition: number | undefined,
   paraLength: number
 ): ProcessingState {
-  const newChunkCounter = state.chunkCounter + 1;
-  const newCharacterPosition =
+  const newCursorPosition =
     chunkStartPosition !== undefined
       ? chunkStartPosition
-      : state.characterPosition + paraLength;
+      : state.cursorPosition + paraLength;
 
   return {
     ...state,
-    chunkCounter: newChunkCounter,
-    characterPosition: newCharacterPosition,
+    chunkId: Bun.randomUUIDv7(),
+    cursorPosition: newCursorPosition,
+    chunkSize: paraLength,
+    tsStart: Date.now(),
+    tsEnd: 0,
   };
 }
 
@@ -46,13 +59,17 @@ export function detectNewGlobalContext(
   });
 }
 
-export function updateGlobalContextTracking(
+export function updateContextTracking(
   state: ProcessingState,
-  currentGlobalContext: string[]
+  currentContext: string[],
+  globalContext: string[]
 ): ProcessingState {
   return {
     ...state,
-    lastFiveGlobalContext: [...currentGlobalContext.slice(-5)],
+    context: {
+      current: [...currentContext],
+      lastFiveGlobal: [...globalContext.slice(-5)],
+    },
   };
 }
 
@@ -61,12 +78,17 @@ export function processChunkData(
   state: ProcessingState
 ): ChunkProcessingResult {
   const currentGlobalContext = factAgent.globalContext;
+  const currentContext = factAgent.currentContext;
   const newGlobalContext = detectNewGlobalContext(
     currentGlobalContext,
-    state.lastFiveGlobalContext
+    state.context.lastFiveGlobal
   );
 
-  const updatedState = updateGlobalContextTracking(state, currentGlobalContext);
+  const updatedState = updateContextTracking(
+    state,
+    currentContext,
+    currentGlobalContext
+  );
   const newFacts = factAgent.flushFacts();
 
   return {
@@ -76,32 +98,29 @@ export function processChunkData(
   };
 }
 
-export function createDocumentMetadata(
+export function createProcessMetadata(
+  processId: string,
   file: Bun.BunFile,
   config: ProcessingConfig,
-  state: ProcessingState,
-  currentContext: string[],
-  status: "processing" | "completed" = "processing"
-): DocumentMetadata {
+  fileSize: number,
+  status: "processing" | "completed" = "processing",
+  description: string = ""
+): ProcessMetadata {
   const filename = file.name
     ? file.name.split("/").pop() || "unknown.txt"
     : "unknown.txt";
   const now = new Date().toISOString();
 
-  const metadata: DocumentMetadata = {
+  const metadata: ProcessMetadata = {
+    processId,
     filename,
     filepath: file.name || "",
+    description,
     processedAt: now,
     lastUpdated: now,
     chunkSizeThreshold: config.chunkSizeThreshold,
-    currentContext,
-    totalChunks: state.chunkCounter,
-    estimatedChunks: state.estimatedChunks,
-    characterPosition: state.characterPosition,
-    factsFile: "facts.jsonl",
-    globalContextFile: "global_context.jsonl",
+    fileSize,
     status,
-    lastChunkProcessedAt: now,
   };
 
   if (status === "completed") {
@@ -115,8 +134,6 @@ export function calculateProgress(
   state: ProcessingState,
   totalFacts: number,
   totalGlobalContext: number,
-  newFactsCount: number,
-  newGlobalContextCount: number,
   fileSize?: number
 ): ProcessingProgress {
   let progressInfo = "";
@@ -124,15 +141,9 @@ export function calculateProgress(
   if (fileSize && fileSize > 0) {
     const progressPercent = Math.min(
       100,
-      (state.characterPosition / fileSize) * 100
+      (state.cursorPosition / fileSize) * 100
     );
-    progressInfo = ` (${progressPercent.toFixed(1)}% - ${state.characterPosition.toLocaleString()}/${fileSize.toLocaleString()} chars)`;
-  } else {
-    // Fallback to chunk-based if file size unknown
-    progressInfo =
-      state.estimatedChunks > 0
-        ? ` (${state.chunkCounter}/${state.estimatedChunks})`
-        : "";
+    progressInfo = ` (${progressPercent.toFixed(1)}% - ${state.cursorPosition.toLocaleString()}/${fileSize.toLocaleString()} chars)`;
   }
 
   return {
@@ -148,7 +159,7 @@ export function formatProgressLog(
   newFactsCount: number,
   newGlobalContextCount: number
 ): string {
-  return `[${new Date().toLocaleTimeString()}] Chunk ${state.chunkCounter}${progress.progressInfo} @ pos ${state.characterPosition}: ${progress.totalFacts} total facts (+${newFactsCount} new), ${progress.totalGlobalContext} context items (+${newGlobalContextCount} new)`;
+  return `[${new Date().toLocaleTimeString()}] Chunk ${state.chunkId}${progress.progressInfo} @ pos ${state.cursorPosition}: ${progress.totalFacts} total facts (+${newFactsCount} new), ${progress.totalGlobalContext} context items (+${newGlobalContextCount} new)`;
 }
 
 export function shouldLogNewGlobalContext(
@@ -162,4 +173,19 @@ export function formatNewGlobalContextLog(
   totalGlobalContextCount: number
 ): string {
   return `[DocumentProcessor] 📝 Detected ${newGlobalContextCount} new context entries out of ${totalGlobalContextCount} total`;
+}
+
+export function createChunk(
+  state: ProcessingState,
+  extraction: any,
+  processMetadata: ProcessMetadata
+): Chunk {
+  return {
+    ...state,
+    tsEnd: Date.now(),
+    hashes: {
+      extraction: Encoder.encode(extraction),
+      processMetadata: Encoder.encode(processMetadata),
+    },
+  };
 }

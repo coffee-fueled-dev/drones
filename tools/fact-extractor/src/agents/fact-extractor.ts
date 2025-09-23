@@ -91,7 +91,10 @@ export class FactExtractionAgent extends FileAgent {
     autostart: true,
   });
 
-  extract = async (chunk: string) =>
+  extract = async (
+    chunk: string,
+    onExtraction?: (extraction: FactResponse | null) => void
+  ) =>
     new Promise<void>((resolve, reject) => {
       // Set up timeout
       const timeoutId = setTimeout(() => {
@@ -103,7 +106,7 @@ export class FactExtractionAgent extends FileAgent {
       this._extractionQ.push(async (cb?: () => void) => {
         try {
           // Try extraction with model rotation for rate limit handling
-          await this.extractWithModelRotation(chunk);
+          await this.extractWithModelRotation(chunk, onExtraction);
           clearTimeout(timeoutId);
           resolve();
         } catch (e) {
@@ -118,7 +121,10 @@ export class FactExtractionAgent extends FileAgent {
   /**
    * Extract facts with automatic model rotation on rate limits
    */
-  private async extractWithModelRotation(chunk: string): Promise<void> {
+  private async extractWithModelRotation(
+    chunk: string,
+    onExtraction?: (extraction: FactResponse | null) => void
+  ): Promise<void> {
     let lastError: Error | null = null;
 
     // Try each model in sequence when rate limited
@@ -177,6 +183,8 @@ export class FactExtractionAgent extends FileAgent {
             format: zodTextFormat(FactResponseSchema, "fact_extraction"),
           },
         });
+
+        onExtraction?.(response.output_parsed);
 
         const out = response.output_parsed;
         if (out?.globalContext?.length) {

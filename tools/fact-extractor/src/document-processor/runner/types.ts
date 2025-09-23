@@ -4,6 +4,7 @@ export interface RunnerConfig {
   enableGraphiti: boolean;
   extractionTimeoutMs: number;
   resumeFromPosition?: number;
+  description?: string;
 }
 
 /** Result of processing a document */
@@ -11,7 +12,7 @@ export interface ProcessingResult {
   filename: string;
   chunksProcessed: number;
   contextItems: number;
-  factsPath: string;
+  chunksPath: string;
   metadataPath: string;
   outputDir: string;
 }

@@ -11,7 +11,8 @@
   "scripts": {
     "context": "bun run --filter @cfd/scripts context",
     "facts:extract": "ENABLE_GRAPHITI=true bun run --elide-lines 0 --env-file ./.env --filter @cfd/fact-extractor all",
-    "facts:extract:local": "RESUME_FROM_POSITION=1231773 ENABLE_GRAPHITI=false bun run --env-file ./.env --filter @cfd/fact-extractor all"
+    "facts:extract:local": "RESUME_FROM_POSITION=413194 ENABLE_GRAPHITI=false bun run --env-file ./.env --filter @cfd/fact-extractor all",
+    "facts:write": "ENABLE_GRAPHITI=true bun run --env-file ./.env --filter @cfd/fact-extractor write-facts"
   },
   "devDependencies": {
     "@types/bun": "latest"

@@ -1,6 +1,5 @@
-import { chat, textEmbedding } from "../shared/models";
-import { searchThreadMessages, updateThreadTitle } from "../../tools";
-import { bloomBusinessContextPrompt } from "../shared/prompts";
+import { chat, textEmbedding } from "./models";
+import { searchThreadMessages, updateThreadTitle } from "../tools";
 
 export const defaultConfig = {
   chat,
@@ -9,7 +8,9 @@ export const defaultConfig = {
     ["Search messages in the thread"]: searchThreadMessages,
     ["Update the thread title"]: updateThreadTitle,
   },
-  instructions: bloomBusinessContextPrompt + "\n\nYou are a helpful assistant.",
+  instructions:
+    "You are an expert advisor on drone regulation in the united states. " +
+    "You should use the tools available to you to consult operators on their obligations with regard todrone regulations.",
   // Used for fetching context messages. See https://docs.convex.dev/agents/context
   contextOptions: {},
   // Used for storing messages. See https://docs.convex.dev/agents/messages

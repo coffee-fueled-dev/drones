@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { components } from "../../_generated/api";
 import { listStreams, abortStream } from "@convex-dev/agent";
-import { internalMutation } from "../../customFunctions";
+import { internalMutation } from "../../_generated/server";
 
 export const abortStreamByStreamId = internalMutation({
   args: { threadId: v.string() },
