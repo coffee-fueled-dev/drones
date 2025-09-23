@@ -15,6 +15,7 @@ export const OperatorProfileSchema = v.object({
   legalAddress: v.id("locations"),
   billingAddress: v.id("locations"),
   threads: v.optional(v.array(v.string())),
+  workosOrganizationId: v.optional(v.string()),
 });
 
 export type OperatorProfile = Infer<typeof OperatorProfileSchema>;

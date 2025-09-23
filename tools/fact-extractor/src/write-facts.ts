@@ -10,7 +10,7 @@ const DOCS_DIR = path.resolve(__dirname, "docs");
 // Configuration from environment variables
 const config: Omit<GraphRunnerConfig, "chunksPath" | "metadataPath"> = {
   graphitiUrl: process.env.GRAPHITI_URL || "http://localhost:8000",
-  delayBetweenChunks: parseInt(process.env.DELAY_BETWEEN_CHUNKS || "200", 10),
+  delayBetweenChunks: parseInt(process.env.DELAY_BETWEEN_CHUNKS || "2000", 10), // Increased to 2s to avoid rate limits
   concurrency: 1, // Keep sequential to avoid overwhelming Graphiti
   enabled: process.env.ENABLE_GRAPHITI !== "false", // Default to enabled
   maxRetries: parseInt(process.env.MAX_RETRIES || "3", 10),

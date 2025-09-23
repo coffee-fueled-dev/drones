@@ -42,6 +42,10 @@ NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Set low concurrency to avoid OpenAI rate limits (default is 10, lower for safety)
+SEMAPHORE_LIMIT = os.getenv("SEMAPHORE_LIMIT", "3")
+os.environ["SEMAPHORE_LIMIT"] = SEMAPHORE_LIMIT
+
 if not (NEO4J_URI and NEO4J_USER and NEO4J_PASSWORD):
     raise RuntimeError("NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD must be set")
 
@@ -57,6 +61,7 @@ async def lifespan(app: FastAPI):
     global graphiti
     try:
         log.info(f"Connecting Graphiti → Neo4j at {NEO4J_URI}")
+        log.info(f"Using SEMAPHORE_LIMIT={SEMAPHORE_LIMIT} to avoid rate limits")
         graphiti = Graphiti(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
 
         # Minimal bootstrap so the graph has what it needs

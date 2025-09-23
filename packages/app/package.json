@@ -1,5 +1,5 @@
 {
-  "name": "@drone/client",
+  "name": "@drone/app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@drone/convex": "workspace:*",
+    "@ai-sdk/openai": "^2.0.32",
+    "@convex-dev/agent": "^0.2.10",
+    "@convex-dev/workflow": "^0.2.6",
+    "convex": "^1.27.1",
+    "convex-helpers": "^0.1.104",
     "@convex-dev/workos": "^0.0.1",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
