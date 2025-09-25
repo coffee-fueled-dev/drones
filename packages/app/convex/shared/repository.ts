@@ -1,11 +1,12 @@
 import { MutationCtx, QueryCtx } from "../_generated/server";
 import { DocumentByName, WithoutSystemFields } from "convex/server";
 import { DataModel } from "../_generated/dataModel";
+import { ITransaction } from "./transaction";
 
 export const createCoreRepositoryOperations = <
   TTableName extends keyof DataModel,
 >(
-  tableName: TTableName,
+  tableName: TTableName
 ): CoreRepositoryOperations<TTableName> => ({
   create: async (ctx, profile) =>
     ctx.db.get(await ctx.db.insert(tableName, profile)),
@@ -23,22 +24,30 @@ export const createCoreRepositoryOperations = <
   get: async (ctx, id) => ctx.db.get(id),
 });
 
-export interface CoreRepositoryOperations<TTableName extends keyof DataModel> {
+interface CoreRepositoryOperations<TTableName extends keyof DataModel> {
   create(
     ctx: MutationCtx,
-    profile: WithoutSystemFields<DocumentByName<DataModel, TTableName>>,
+    profile: WithoutSystemFields<DocumentByName<DataModel, TTableName>>
   ): Promise<DocumentByName<DataModel, TTableName> | null>;
   save(
     ctx: MutationCtx,
-    profile: DocumentByName<DataModel, TTableName>,
+    profile: DocumentByName<DataModel, TTableName>
   ): Promise<void>;
   get(
     ctx: QueryCtx,
-    id: DocumentByName<DataModel, TTableName>["_id"],
+    id: DocumentByName<DataModel, TTableName>["_id"]
   ): Promise<DocumentByName<DataModel, TTableName> | null>;
   delete(
     ctx: MutationCtx,
-    id: DocumentByName<DataModel, TTableName>["_id"],
+    id: DocumentByName<DataModel, TTableName>["_id"]
   ): Promise<void>;
   list(ctx: QueryCtx): Promise<DocumentByName<DataModel, TTableName>[]>;
+}
+
+export interface IRepository<TTableName extends keyof DataModel>
+  extends CoreRepositoryOperations<TTableName> {
+  startTransaction(
+    ctx: MutationCtx,
+    id: DocumentByName<DataModel, TTableName>["_id"]
+  ): Promise<ITransaction<TTableName>>;
 }

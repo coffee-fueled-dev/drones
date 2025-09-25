@@ -24,7 +24,6 @@ import type * as knowledgeGraph_triggers from "../knowledgeGraph/triggers.js";
 import type * as shared_repository from "../shared/repository.js";
 import type * as shared_systemFields from "../shared/systemFields.js";
 import type * as workflow from "../workflow.js";
-import type * as workspace_entities_company from "../workspace/entities/company.js";
 import type * as workspace_tables from "../workspace/tables.js";
 import type * as workspace_triggers from "../workspace/triggers.js";
 
@@ -59,7 +58,6 @@ declare const fullApi: ApiFromModules<{
   "shared/repository": typeof shared_repository;
   "shared/systemFields": typeof shared_systemFields;
   workflow: typeof workflow;
-  "workspace/entities/company": typeof workspace_entities_company;
   "workspace/tables": typeof workspace_tables;
   "workspace/triggers": typeof workspace_triggers;
 }>;

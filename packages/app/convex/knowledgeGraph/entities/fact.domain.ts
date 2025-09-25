@@ -1,7 +1,10 @@
 import { WithoutSystemFields } from "convex/server";
 import { Infer, v } from "convex/values";
 import { SystemFields } from "../../shared/systemFields";
-import { CoreRepositoryOperations } from "../../shared/repository";
+import { IRepository } from "../../shared/repository";
+import { MutationCtx } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
+import { ITransaction } from "../../shared/transaction";
 
 export const FactSchema = v.object({
   ...SystemFields("facts"),
@@ -30,4 +33,19 @@ export const FactSchema = v.object({
 export type Fact = Infer<typeof FactSchema>;
 export type NewFact = WithoutSystemFields<Fact>;
 
-export interface IFactRepository extends CoreRepositoryOperations<"facts"> {}
+export interface IFactRepository extends IRepository<"facts"> {
+  startTransaction(
+    ctx: MutationCtx,
+    id: Id<"facts">
+  ): Promise<IFactTransaction>;
+}
+
+export interface IFactTransaction extends ITransaction<"facts"> {
+  addStatus(status: Fact["statuses"][number]): this;
+  setCompleted(timestamp?: number): this;
+  setError(error: string, timestamp?: number): this;
+  updateSubject(subject: string): this;
+  updatePredicate(predicate: string): this;
+  updateObject(object: string): this;
+  updateSource(source: string | null): this;
+}

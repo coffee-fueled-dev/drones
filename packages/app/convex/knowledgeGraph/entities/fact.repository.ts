@@ -1,5 +1,10 @@
 import { createCoreRepositoryOperations } from "../../shared/repository";
 import { IFactRepository } from "./fact.domain";
+import { FactTransaction } from "./fact.transaction";
 
-export const FactRepository: IFactRepository =
-  createCoreRepositoryOperations("facts");
+const baseRepository = createCoreRepositoryOperations("facts");
+
+export const FactRepository: IFactRepository = {
+  ...baseRepository,
+  startTransaction: async (ctx, id) => new FactTransaction(ctx).start(id),
+};

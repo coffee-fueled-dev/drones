@@ -91,13 +91,6 @@ export async function extractFacts({
   const contextEntries = Math.min(globalContext.length, 5);
   const context = globalContext.slice(-contextEntries).join("\n");
 
-  // Log request size for debugging
-  const totalPromptLength =
-    chunk.length + context.length + currentContext.join("").length;
-  console.log(
-    `[extractFacts] 📏 Request size: chunk=${chunk.length} chars, context=${context.length} chars, total≈${totalPromptLength} chars`
-  );
-
   let lastError: Error | null = null;
 
   // Try each model in sequence when rate limited
@@ -105,12 +98,6 @@ export async function extractFacts({
     const model = models[attempt];
 
     try {
-      console.log(
-        `[extractFacts] Using model: ${model} (attempt ${attempt + 1}/${
-          models.length
-        })`
-      );
-
       // Create timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
@@ -152,25 +139,17 @@ export async function extractFacts({
       // Race between extraction and timeout
       const response = await Promise.race([extractionPromise, timeoutPromise]);
 
-      console.log(`[extractFacts] ✅ Success with model: ${model}`);
       return response.output_parsed;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
       // Check if this is a timeout error - don't retry different models for timeouts
       if (isTimeoutError(error)) {
-        console.error(
-          `[extractFacts] ⏰ Timeout on model ${model} after ${timeoutMs}ms`
-        );
         throw error;
       }
 
       // Check if this is a rate limit error
       if (isRateLimitError(error)) {
-        console.warn(
-          `[extractFacts] ⚠️ Rate limited on model ${model}, trying next model...`
-        );
-
         // Add a small delay before trying next model
         if (attempt < models.length - 1) {
           await sleep(500 + attempt * 200); // 500ms, 700ms, 900ms...
@@ -179,13 +158,11 @@ export async function extractFacts({
       }
 
       // For other non-rate-limit errors, fail immediately
-      console.error(`[extractFacts] ❌ Error with model ${model}:`, error);
       throw error;
     }
   }
 
   // If we get here, all models failed with rate limits
-  console.error(`[extractFacts] ❌ All models rate limited, giving up`);
   throw new Error(
     `All available models are rate limited. Last error: ${lastError?.message}`
   );

@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server";
 import { withoutSystemFields } from "convex-helpers";
 import { UserSchema } from "./entities/user.domain";
-import { CompanySchema } from "./entities/company";
+import { CompanySchema } from "./entities/company.domain";
 
 export const workspaceTables = {
   users: defineTable(withoutSystemFields(UserSchema.fields))
