@@ -1,5 +1,15 @@
-import { Transaction } from "../../shared/transaction";
-import { Fact, IFactTransaction } from "./fact.domain";
+import { ITransaction, Transaction } from "../../shared/transaction";
+import { Fact } from "./fact.domain";
+
+export interface IFactTransaction extends ITransaction<"facts"> {
+  addStatus(status: Fact["statuses"][number]): this;
+  setCompleted(timestamp?: number): this;
+  setError(error: string, timestamp?: number): this;
+  updateSubject(subject: string): this;
+  updatePredicate(predicate: string): this;
+  updateObject(object: string): this;
+  updateSource(source: string | null): this;
+}
 
 export class FactTransaction
   extends Transaction<"facts">

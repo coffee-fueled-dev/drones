@@ -1,5 +1,13 @@
-import { Transaction } from "../../shared/transaction";
-import { Source, ISourceTransaction } from "./source.domain";
+import { ITransaction, Transaction } from "../../shared/transaction";
+import { Source } from "./source.domain";
+
+export interface ISourceTransaction extends ITransaction<"sources"> {
+  addStatus(status: Source["statuses"][number]): this;
+  setCompleted(timestamp?: number): this;
+  setError(error: string, timestamp?: number): this;
+  updateName(name: string): this;
+  updateDescription(description: string): this;
+}
 
 export class SourceTransaction
   extends Transaction<"sources">

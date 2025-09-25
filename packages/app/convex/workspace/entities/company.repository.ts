@@ -1,6 +1,27 @@
 import { createCoreRepositoryOperations } from "../../shared/repository";
-import { ICompanyRepository } from "./company.domain";
+import { IRepository } from "../../shared/repository";
+import { MutationCtx } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
+import { QueryCtx } from "../../_generated/server";
+import { Company } from "./company.domain";
+import { NewCompany } from "./company.domain";
+import { ICompanyTransaction } from "./company.transaction";
 import { CompanyTransaction } from "./company.transaction";
+
+export interface ICompanyRepository extends IRepository<"companies"> {
+  find(
+    ctx: QueryCtx,
+    selector: {
+      id?: Id<"companies">;
+      workosOrganizationId?: string;
+    }
+  ): Promise<Company | null>;
+  upsert(ctx: MutationCtx, CompanyData: NewCompany): Promise<Id<"companies">>;
+  startTransaction(
+    ctx: MutationCtx,
+    id: Id<"companies">
+  ): Promise<ICompanyTransaction>;
+}
 
 const baseRepository = createCoreRepositoryOperations("companies");
 

@@ -1,6 +1,18 @@
-import { createCoreRepositoryOperations } from "../../shared/repository";
-import { ISourceRepository } from "./source.domain";
+import {
+  createCoreRepositoryOperations,
+  IRepository,
+} from "../../shared/repository";
 import { SourceTransaction } from "./source.transaction";
+import { MutationCtx } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
+import { ISourceTransaction } from "./source.transaction";
+
+export interface ISourceRepository extends IRepository<"sources"> {
+  startTransaction(
+    ctx: MutationCtx,
+    id: Id<"sources">
+  ): Promise<ISourceTransaction>;
+}
 
 const baseRepository = createCoreRepositoryOperations("sources");
 

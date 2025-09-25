@@ -1,6 +1,29 @@
 import { createCoreRepositoryOperations } from "../../shared/repository";
-import { IUserRepository } from "./user.domain";
+import { IRepository } from "../../shared/repository";
+import { MutationCtx } from "../../_generated/server";
+import { QueryCtx } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
+import { IUserTransaction } from "./user.transaction";
+import { User } from "./user.domain";
+import { NewUser } from "./user.domain";
 import { UserTransaction } from "./user.transaction";
+
+export interface IUserRepository extends IRepository<"users"> {
+  find(
+    ctx: QueryCtx,
+    selector: {
+      id?: Id<"users">;
+      workosUserId?: string;
+    }
+  ): Promise<User | null>;
+
+  upsert(ctx: MutationCtx, userData: NewUser): Promise<Id<"users">>;
+
+  startTransaction(
+    ctx: MutationCtx,
+    id: Id<"users">
+  ): Promise<IUserTransaction>;
+}
 
 const baseRepository = createCoreRepositoryOperations("users");
 
