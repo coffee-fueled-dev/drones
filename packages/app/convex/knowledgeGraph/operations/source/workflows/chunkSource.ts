@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { workflow } from "../../../workflow";
-import { internal } from "../../../_generated/api";
-import { internalAction } from "../../../customFunctions";
+import { workflow } from "../../../../workflow";
+import { internal } from "../../../../_generated/api";
+import { internalAction } from "../../../../customFunctions";
 
 export const run = internalAction({
   args: {
@@ -12,7 +12,8 @@ export const run = internalAction({
 
     const workflowId = await workflow.start(
       ctx,
-      internal.knowledgeGraph.operations.workflows.chunkSource.chunkSource,
+      internal.knowledgeGraph.operations.source.workflows.chunkSource
+        .chunkSource,
       {
         sourceId,
       }
