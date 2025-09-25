@@ -32,7 +32,7 @@ export const create = internalMutation({
   },
 });
 
-export const updateStatus = internalMutation({
+export const addStatus = internalMutation({
   args: {
     chunkId: v.id("chunks"),
     status: v.union(

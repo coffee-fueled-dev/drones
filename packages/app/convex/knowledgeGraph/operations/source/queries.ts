@@ -35,6 +35,10 @@ export const getNextChunk = internalQuery({
       .filter((chunk) => chunk.cursor.position >= startPosition)
       .sort((a, b) => a.cursor.position - b.cursor.position)[0];
 
-    return nextChunk || null;
+    if (!nextChunk) {
+      return null;
+    }
+
+    return { id: nextChunk._id, cursor: nextChunk.cursor };
   },
 });

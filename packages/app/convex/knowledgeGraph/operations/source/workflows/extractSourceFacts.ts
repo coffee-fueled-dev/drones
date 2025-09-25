@@ -41,11 +41,9 @@ export const extractSourceFacts = workflow.define({
     sourceId: v.id("sources"),
   },
   handler: async (step, { sourceId }): Promise<number> => {
-    console.log(`Extract facts workflow starting for source: ${sourceId}`);
-
     // Update source status to extracting
     await step.runMutation(
-      internal.knowledgeGraph.operations.source.mutations.updateStatus,
+      internal.knowledgeGraph.operations.source.mutations.addStatus,
       {
         sourceId,
         status: "extracting",
@@ -70,15 +68,15 @@ export const extractSourceFacts = workflow.define({
 
         // If no more chunks, we're done
         if (!nextChunk) {
-          console.log(`No more chunks found. Completed processing.`);
           break;
         }
 
         // Extract facts from this chunk - await completion for sequential processing
-        const factsCount = await step.runAction(
-          internal.knowledgeGraph.operations.source.chunk.actions.analyze,
+        await step.runAction(
+          internal.knowledgeGraph.operations.source.chunk.workflows.analyzeChunk
+            .run,
           {
-            chunkId: nextChunk._id,
+            chunkId: nextChunk.id,
             previousChunkId: previousChunkId,
           },
           {
@@ -86,32 +84,14 @@ export const extractSourceFacts = workflow.define({
           }
         );
 
-        totalFactsExtracted += factsCount;
-
         // Update cursor for next iteration
         currentPosition = nextChunk.cursor.position + nextChunk.cursor.size;
-        previousChunkId = nextChunk._id;
+        previousChunkId = nextChunk.id;
       }
-
-      if (totalFactsExtracted === 0) {
-        await step.runMutation(
-          internal.knowledgeGraph.operations.source.mutations.updateStatus,
-          {
-            sourceId,
-            status: "error",
-            error: "No chunks found to extract facts from",
-          }
-        );
-        return 0;
-      }
-
-      console.log(
-        `Completed fact extraction for source ${sourceId}. Total facts: ${totalFactsExtracted}`
-      );
 
       // Update source status to extracted
       await step.runMutation(
-        internal.knowledgeGraph.operations.source.mutations.updateStatus,
+        internal.knowledgeGraph.operations.source.mutations.addStatus,
         {
           sourceId,
           status: "extracted",
@@ -120,11 +100,9 @@ export const extractSourceFacts = workflow.define({
 
       return totalFactsExtracted;
     } catch (error) {
-      console.error(`Error in fact extraction workflow:`, error);
-
       // Update source status to error
       await step.runMutation(
-        internal.knowledgeGraph.operations.source.mutations.updateStatus,
+        internal.knowledgeGraph.operations.source.mutations.addStatus,
         {
           sourceId,
           status: "error",

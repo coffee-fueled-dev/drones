@@ -2,6 +2,38 @@ import { v } from "convex/values";
 import { workflow } from "../../../../../workflow";
 import { internal } from "../../../../../_generated/api";
 import { Id } from "../../../../../_generated/dataModel";
+import { internalAction } from "../../../../../customFunctions";
+
+export const run = internalAction({
+  args: {
+    chunkId: v.id("chunks"),
+    previousChunkId: v.optional(v.id("chunks")),
+  },
+  handler: async (ctx, { chunkId, previousChunkId }) => {
+    console.log(`Analyzing chunk: ${chunkId}`);
+
+    const workflowId = await workflow.start(
+      ctx,
+      internal.knowledgeGraph.operations.source.chunk.workflows.analyzeChunk
+        .analyzeChunk,
+      { chunkId, previousChunkId }
+    );
+
+    try {
+      while (true) {
+        const status = await workflow.status(ctx, workflowId);
+        if (status.type === "inProgress") {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          continue;
+        }
+        console.log("Workflow completed with status:", status);
+        break;
+      }
+    } finally {
+      await workflow.cleanup(ctx, workflowId);
+    }
+  },
+});
 
 export const analyzeChunk = workflow.define({
   args: {
@@ -37,7 +69,7 @@ export const analyzeChunk = workflow.define({
 
     // Step 2: Update status to extracting
     await step.runMutation(
-      internal.knowledgeGraph.operations.source.chunk.mutations.updateStatus,
+      internal.knowledgeGraph.operations.source.chunk.mutations.addStatus,
       {
         chunkId,
         status: "extracting",
@@ -96,7 +128,7 @@ export const analyzeChunk = workflow.define({
 
     // Step 6: Update status to extracted
     await step.runMutation(
-      internal.knowledgeGraph.operations.source.chunk.mutations.updateStatus,
+      internal.knowledgeGraph.operations.source.chunk.mutations.addStatus,
       {
         chunkId,
         status: "extracted",

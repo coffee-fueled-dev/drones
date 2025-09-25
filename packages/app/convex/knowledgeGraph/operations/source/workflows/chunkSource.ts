@@ -40,8 +40,6 @@ export const chunkSource = workflow.define({
     sourceId: v.id("sources"),
   },
   handler: async (step, { sourceId }): Promise<number> => {
-    console.log(`Chunk workflow starting for source: ${sourceId}`);
-
     const source = await step.runQuery(
       internal.knowledgeGraph.operations.source.queries.getById,
       {
@@ -50,15 +48,12 @@ export const chunkSource = workflow.define({
     );
 
     if (!source) {
-      console.error(`Document not found: ${sourceId}`);
-      throw new Error("Document not found");
+      throw new Error(`Document not found: ${sourceId}`);
     }
-
-    console.log(`Document found:`, source.name);
 
     try {
       await step.runMutation(
-        internal.knowledgeGraph.operations.source.mutations.updateStatus,
+        internal.knowledgeGraph.operations.source.mutations.addStatus,
         {
           sourceId,
           status: "chunking",
@@ -72,25 +67,19 @@ export const chunkSource = workflow.define({
           storageId: source.storageId,
         }
       );
-      console.log(
-        `Chunk processing completed. Total chunks created: ${totalChunks}`
-      );
 
-      console.log(`Updating status to 'chunked'`);
       await step.runMutation(
-        internal.knowledgeGraph.operations.source.mutations.updateStatus,
+        internal.knowledgeGraph.operations.source.mutations.addStatus,
         {
           sourceId,
           status: "chunked",
         }
       );
-      console.log(`Source status updated to 'chunked'`);
 
       return totalChunks;
     } catch (error) {
-      console.error(`Error in chunk workflow:`, error);
       await step.runMutation(
-        internal.knowledgeGraph.operations.source.mutations.updateStatus,
+        internal.knowledgeGraph.operations.source.mutations.addStatus,
         {
           sourceId,
           status: "error",

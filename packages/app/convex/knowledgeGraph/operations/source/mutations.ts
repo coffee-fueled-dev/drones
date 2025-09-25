@@ -32,7 +32,7 @@ export const create = mutation({
   },
 });
 
-export const updateStatus = internalMutation({
+export const addStatus = internalMutation({
   args: {
     sourceId: v.id("sources"),
     status: SourceStatusSchema,

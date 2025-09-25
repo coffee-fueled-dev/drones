@@ -35,7 +35,7 @@ export const create = internalMutation({
   },
 });
 
-export const updateStatus = internalMutation({
+export const addStatus = internalMutation({
   args: {
     factId: v.id("facts"),
     status: v.union(
