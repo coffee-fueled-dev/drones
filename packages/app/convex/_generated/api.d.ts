@@ -15,6 +15,7 @@ import type * as knowledgeGraph_operations_source_chunk_fact_mutations from "../
 import type * as knowledgeGraph_operations_source_chunk_libs_extractFacts from "../knowledgeGraph/operations/source/chunk/libs/extractFacts.js";
 import type * as knowledgeGraph_operations_source_chunk_mutations from "../knowledgeGraph/operations/source/chunk/mutations.js";
 import type * as knowledgeGraph_operations_source_chunk_queries from "../knowledgeGraph/operations/source/chunk/queries.js";
+import type * as knowledgeGraph_operations_source_chunk_workflows_analyzeChunk from "../knowledgeGraph/operations/source/chunk/workflows/analyzeChunk.js";
 import type * as knowledgeGraph_operations_source_mutations from "../knowledgeGraph/operations/source/mutations.js";
 import type * as knowledgeGraph_operations_source_queries from "../knowledgeGraph/operations/source/queries.js";
 import type * as knowledgeGraph_operations_source_workflows_chunkSource from "../knowledgeGraph/operations/source/workflows/chunkSource.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "knowledgeGraph/operations/source/chunk/libs/extractFacts": typeof knowledgeGraph_operations_source_chunk_libs_extractFacts;
   "knowledgeGraph/operations/source/chunk/mutations": typeof knowledgeGraph_operations_source_chunk_mutations;
   "knowledgeGraph/operations/source/chunk/queries": typeof knowledgeGraph_operations_source_chunk_queries;
+  "knowledgeGraph/operations/source/chunk/workflows/analyzeChunk": typeof knowledgeGraph_operations_source_chunk_workflows_analyzeChunk;
   "knowledgeGraph/operations/source/mutations": typeof knowledgeGraph_operations_source_mutations;
   "knowledgeGraph/operations/source/queries": typeof knowledgeGraph_operations_source_queries;
   "knowledgeGraph/operations/source/workflows/chunkSource": typeof knowledgeGraph_operations_source_workflows_chunkSource;
