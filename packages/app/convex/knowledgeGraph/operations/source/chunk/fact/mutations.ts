@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation } from "../../../../../customFunctions";
+import { FactRepository } from "../../../../entities/fact.repository";
 
 export const create = internalMutation({
   args: {
@@ -15,7 +16,6 @@ export const create = internalMutation({
     const now = Date.now();
 
     const factId = await ctx.db.insert("facts", {
-      createdAt: now,
       updatedAt: now,
       chunk: chunkId,
       subject: fact.subject,
@@ -48,23 +48,21 @@ export const updateStatus = internalMutation({
     error: v.optional(v.string()),
   },
   handler: async (ctx, { factId, status, error }) => {
-    const fact = await ctx.db.get(factId);
-    if (!fact) {
-      throw new Error("Fact not found");
-    }
-
     const now = Date.now();
     const newStatus = {
       label: status,
       timestamp: now,
     };
 
-    await ctx.db.patch(factId, {
-      updatedAt: now,
-      completedAt:
-        status === "completed" || status === "error" ? now : fact.completedAt,
-      error: error,
-      statuses: [...fact.statuses, newStatus],
-    });
+    const updatedFact = await FactRepository.startTransaction(ctx, factId).then(
+      (tx) => {
+        tx.addStatus(newStatus);
+        if (status === "completed" || status === "error") tx.setCompleted(now);
+        if (error) tx.setError(error, now);
+        return tx.commit();
+      }
+    );
+
+    return updatedFact;
   },
 });

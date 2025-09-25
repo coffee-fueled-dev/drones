@@ -15,7 +15,6 @@ export const create = mutation({
     const now = Date.now();
     const createdSource = await SourceRepository.create(ctx, {
       ...source,
-      createdAt: now,
       updatedAt: now,
       statuses: [
         {
@@ -42,12 +41,6 @@ export const updateStatus = internalMutation({
   handler: async (ctx, { sourceId, status, error }) => {
     console.log(`Updating source ${sourceId} status to: ${status}`);
 
-    const source = await ctx.db.get(sourceId);
-    if (!source) {
-      console.error(`Source not found in updateStatus: ${sourceId}`);
-      throw new Error("Source not found");
-    }
-
     const now = Date.now();
     const newStatus = {
       label: status,
@@ -55,18 +48,20 @@ export const updateStatus = internalMutation({
     };
 
     try {
-      await ctx.db.patch(sourceId, {
-        updatedAt: now,
-        completedAt:
-          status === "completed" || status === "error"
-            ? now
-            : source.completedAt,
-        error: error,
-        statuses: [...source.statuses, newStatus],
+      const updatedSource = await SourceRepository.startTransaction(
+        ctx,
+        sourceId
+      ).then((tx) => {
+        tx.addStatus(newStatus);
+        if (status === "completed" || status === "error") tx.setCompleted(now);
+        if (error) tx.setError(error, now);
+        return tx.commit();
       });
+
       console.log(`Successfully updated source status to: ${status}`);
+      return updatedSource;
     } catch (patchError) {
-      console.error(`Error patching source:`, patchError);
+      console.error(`Error updating source:`, patchError);
       throw patchError;
     }
   },

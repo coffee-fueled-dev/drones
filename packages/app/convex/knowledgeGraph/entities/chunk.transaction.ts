@@ -12,14 +12,14 @@ export class ChunkTransaction
       statuses: [...chunk.statuses, status],
     }));
 
-  setCompleted = (timestamp: number = Date.now()): this =>
+  setCompleted = (timestamp: Chunk["completedAt"] = Date.now()): this =>
     this._update((chunk) => ({
       ...chunk,
       completedAt: timestamp,
       statuses: [...chunk.statuses, { label: "completed", timestamp }],
     }));
 
-  setError = (error: string, timestamp: number = Date.now()): this =>
+  setError = (error: Chunk["error"], timestamp: number = Date.now()): this =>
     this._update((chunk) => ({
       ...chunk,
       error,
@@ -32,12 +32,21 @@ export class ChunkTransaction
       facts: [...(chunk.facts || []), factId],
     }));
 
+  setFacts = (factIds: Id<"facts">[]): this =>
+    this._update((chunk) => ({
+      ...chunk,
+      facts: factIds,
+    }));
+
   removeFact = (factId: Id<"facts">): this =>
     this._update((chunk) => ({
       ...chunk,
       facts: (chunk.facts || []).filter((id) => id !== factId),
     }));
 
-  updateContent = (content: string): this =>
+  setContent = (content: Chunk["content"]): this =>
     this._update((chunk) => ({ ...chunk, content }));
+
+  setContext = (context: Chunk["context"]): this =>
+    this._update((chunk) => ({ ...chunk, context }));
 }

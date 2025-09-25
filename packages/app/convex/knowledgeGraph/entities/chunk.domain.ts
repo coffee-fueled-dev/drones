@@ -52,9 +52,11 @@ export interface IChunkRepository extends IRepository<"chunks"> {
 
 export interface IChunkTransaction extends ITransaction<"chunks"> {
   addStatus(status: Chunk["statuses"][number]): this;
-  setCompleted(timestamp?: number): this;
-  setError(error: string, timestamp?: number): this;
+  setCompleted(timestamp?: Chunk["completedAt"]): this;
+  setError(error: Chunk["error"], timestamp?: number): this;
   addFact(factId: Id<"facts">): this;
+  setFacts(factIds: Id<"facts">[]): this;
   removeFact(factId: Id<"facts">): this;
-  updateContent(content: string): this;
+  setContext(context: Chunk["context"]): this;
+  setContent(content: Chunk["content"]): this;
 }

@@ -3,6 +3,7 @@ import { extractFacts } from "./libs/extractFacts";
 import OpenAI from "openai";
 import { internalAction } from "../../../../customFunctions";
 import { internal } from "../../../../_generated/api";
+import { Id } from "../../../../_generated/dataModel";
 
 export const analyze = internalAction({
   args: {
@@ -80,7 +81,7 @@ export const analyze = internalAction({
       );
 
       // Save facts to database
-      const factIds: string[] = [];
+      const factIds: Id<"facts">[] = [];
       for (const fact of factResponse.facts) {
         const factId = await ctx.runMutation(
           internal.knowledgeGraph.operations.source.chunk.fact.mutations.create,
